@@ -1,0 +1,16 @@
+html, body {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  min-height: 100%;
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+#welcomeText {
+  text-align: center;
+}
+
+#titleText {
+  text-align: center;
+}

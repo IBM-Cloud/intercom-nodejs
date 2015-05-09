@@ -1,17 +1,29 @@
-This README.md file is displayed on your project page. You should edit this 
-file to describe your project, including instructions for building and 
-running the project, pointers to the license under which you are making the 
-project available, and anything else you think would be useful for others to
-know.
+# Overview
 
-We have created an empty license.txt file for you. Well, actually, it says,
-"<Replace this text with the license you've chosen for your project.>" We 
-recommend you edit this and include text for license terms under which you're
-making your code available. A good resource for open source licenses is the 
-[Open Source Initiative](http://opensource.org/).
+Intercom allows users to initiate and participate in remote chats
+with various experts through voice communication.
 
-Be sure to update your project's profile with a short description and 
-eye-catching graphic.
 
-Finally, consider defining some sprints and work items in Track & Plan to give 
-interested developers a sense of your cadence and upcoming enhancements.
+## Files
+
+The Node.js application has files as below:
+
+*   app.js
+
+	This file contains the server side JavaScript code for the application written using node.js
+
+*   package.json
+
+	This file is required by the node.js runtime. It specifies the node.js project name, dependencies, and other configurations of your node.js application.
+
+*   node_modules/
+
+	This directory contains the modules used and referenced in the application. It is required by the express framework.
+
+*   public/
+
+	This directory contains public resources of the application. It contains the images, CSS, and JS resources. It is required by the express framework.
+
+*   views/
+
+	This directory contains the .dust files used to deliver the views to the client accessing the application.

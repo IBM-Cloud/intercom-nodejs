@@ -1,0 +1,10 @@
+---
+applications:
+- name: Intercom
+  framework: node
+  runtime: node10
+  memory: 512M
+  instances: 1
+  host: intercom
+  path: .
+  command: node app.js

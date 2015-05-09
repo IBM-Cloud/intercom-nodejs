@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <title>Intercom</title>
+    <meta charset="utf-8">
+    <meta name="description" content="Giving the world's knowledge seekers a direct line to the answers they need.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link href="css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="css/splash.css" type="text/css" rel="stylesheet">
+
+    <!-- Run all vendor JS scripts -->
+    <script src="javascript/jquery-1.11.2.min.js"></script>
+    <script src="javascript/bootstrap.min.js"></script>
+  </head>
+
+  <body>
+    <div id="screen-wrapper">
+      <div class="container-fluid">
+        <p id="welcomeText">Welcome to</p>
+        <p id="titleText">Intercom</p>
+        <button type="button" id="enterButton" class="btn btn-primary btn-med">Go</button>
+      </div>
+    </div>
+    <script>
+      document.getElementById("enterButton").onclick = function () {
+        location.href = "/chat";
+      };
+    </script>
+  </body>
+</html>

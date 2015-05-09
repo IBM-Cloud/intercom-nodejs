@@ -1,0 +1,346 @@
+html, body {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  min-height: 100%;
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.container-fluid {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin-bottom: -45px;
+  position: relative;
+}
+
+.jumbotron {
+  margin-bottom: 20px;
+  padding-top: 20px;
+  padding-bottom: 30px;
+  background-color: #1d3649;
+  color: white;
+  width: 100%;
+}
+
+.header-text {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  padding-left: 10px;
+  text-align: left;
+}
+
+.errorMsg {
+    font-weight: bold;
+    color: red;
+}
+
+.btn-primary {
+  background-color: #5596e6;
+}
+
+.btn-primary:hover {
+  background-color: #1d3649;
+}
+
+.btn {
+  border-radius: 0px;
+}
+
+.btn-main {
+  position: relative;
+  float: right;
+  right: 0;
+  text-align: center;
+}
+
+#screen-wrapper {
+  width: 100%;
+}
+
+.clear-footer {
+  height: 45px;
+  clear: both;
+}
+
+.footer {
+  position: relative;
+  bottom: 0;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-size: 15px;
+  width: 100%;
+  height: 20px;
+  padding-top: 60px;
+  padding-bottom: 30px;
+  color: #333;
+  text-align: center;
+  clear: both;
+}
+
+.question-border {
+  position:relative;
+  min-width: 200px;
+  padding:10px 15px;
+  margin:.5em 0 2em;
+  border:5px solid #5aaafa;
+  text-align:center;
+  color:#333;
+  background:#fff;
+}
+
+/* creates larger curve */
+.question-border:before {
+  content:"";
+  position:absolute;
+  z-index:10;
+  bottom:-30px;
+  width:50px;
+  height:30px;
+  border-style:solid;
+  border-width:0 0 5px 5px;
+  border-color:#5aaafa;
+  background:transparent;
+  /* css3 */
+  -webkit-border-bottom-left-radius:80px 50px;
+  -moz-border-radius-bottomleft:80px 50px;
+  border-bottom-left-radius:80px 50px;
+  /* reduce the damage in FF3.0 */
+  display:block;
+}
+
+/* creates smaller curve */
+.question-border:after {
+  content:"";
+  position:absolute;
+  z-index:10;
+  bottom:-30px;
+  width:20px;
+  height:30px;
+  border-style:solid;
+  border-width:0 0 5px 5px;
+  border-color:#5aaafa;
+  background:transparent;
+  /* css3 */
+  -webkit-border-bottom-left-radius:40px 50px;
+  -moz-border-radius-bottomleft:40px 50px;
+  border-bottom-left-radius:40px 50px;
+  /* reduce the damage in FF3.0 */
+  display:block;
+}
+
+.question-border-tip {
+  padding:10px 15px;
+}
+
+/* creates a small circle to produce a rounded point where the two curves meet */
+.question-border-tip:before {
+  content:"";
+  position:absolute;
+  bottom:-30px;
+  width:5px;
+  height:4.5px;
+  background:#5aaafa;
+  /* css3 */
+  -webkit-border-radius:10px;
+  -moz-border-radius:10px;
+  border-radius:10px;
+}
+
+/* creates a white rectangle to cover part of the oval border*/
+.question-border-tip:after {
+  content:"";
+  position:absolute;
+  bottom:-5px;
+  width:26px;
+  height:5px;
+  background:#fff;
+}
+
+.answer-border {
+  position:relative;
+  min-width: 200px;
+  margin:.5em 0 2em;
+  border:5px solid #41d6c3;
+  text-align:center;
+  color:#333;
+  background:#fff;
+}
+
+/* creates larger curve */
+.answer-border:before {
+  content:"";
+  position:absolute;
+  z-index:10;
+  bottom:-30px;
+  width:50px;
+  height:30px;
+  border-style:solid;
+  border-width:0 5px 5px 0;
+  border-color:#41d6c3;
+  background:transparent;
+  /* css3 */
+  -webkit-border-bottom-right-radius:80px 50px;
+  -moz-border-radius-bottomright:80px 50px;
+  border-bottom-right-radius:80px 50px;
+  /* reduce the damage in FF3.0 */
+  display:block;
+}
+
+/* creates smaller curve */
+.answer-border:after {
+  content:"";
+  position:absolute;
+  z-index:10;
+  bottom:-30px;
+  width:20px;
+  height:30px;
+  border-style:solid;
+  border-width:0 5px 5px 0;
+  border-color:#41d6c3;
+  background:transparent;
+  /* css3 */
+  -webkit-border-bottom-right-radius:40px 50px;
+  -moz-border-radius-bottomright:40px 50px;
+  border-bottom-right-radius:40px 50px;
+  /* reduce the damage in FF3.0 */
+  display:block;
+}
+
+.answer-border-tip {
+  padding:10px 15px;
+}
+
+/* creates a small circle to produce a rounded point where the two curves meet */
+.answer-border-tip:before {
+  content:"";
+  position:absolute;
+  bottom:-30px;
+  width:5px;
+  height:5px;
+  background:#41d6c3;
+  /* css3 */
+  -webkit-border-radius:10px;
+  -moz-border-radius:10px;
+  border-radius:10px;
+}
+
+/* creates a white rectangle to cover part of the oval border*/
+.answer-border-tip:after {
+  content:"";
+  position:absolute;
+  bottom:-5px;
+  width:26px;
+  height:5px;
+  background:#fff;
+}
+
+.askSection {
+  background-color: #41d6c3;
+  padding: 20px;
+}
+
+.mic {
+  width: 100%;
+}
+
+.micButton {
+  background: url('../images/microphone.svg') no-repeat;
+  width: 120px;
+  height: 120px;
+  margin: 0px auto;
+  cursor: pointer;
+}
+
+.micButton.recording {
+  background: url('../images/microphone_recording.svg') no-repeat;
+}
+
+.micButton.recording:hover {
+  background: url('../images/microphone_recording.svg') no-repeat;
+}
+
+.micButton:hover {
+  background: url('../images/microphone_hover.svg') no-repeat;
+}
+
+.micText {
+  font-size: 14px;
+  margin-top: 10px;
+  color: #999999;
+  text-align: center;
+}
+
+.question-text, .answer-text{
+  font-size: 20px;
+}
+
+.well {
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 20px;
+  background-color: #fafafa;
+  border: 1px solid #F1F1F2;
+  border-radius: 0px;
+ // -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+ // box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.well blockquote {
+  border-color: #ddd;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.well-lg {
+  padding: 24px;
+  border-radius: 0px;
+}
+
+.well-sm {
+  padding: 9px;
+  border-radius: 0px;
+}
+
+legend {
+  max-width:100px;
+  text-align: center;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin-bottom: 0px;
+  border:none;
+}
+
+h1 {
+  font-size: 40px;
+}
+
+h2 {
+  font-size: 20px;
+}
+
+a {
+  color: #333;
+}
+
+a:hover {
+  color: #000;
+}
+
+a.button {
+  display: inline-block;
+  background: #56ba4a;
+  border: 3px solid #59a24f;
+  color: #fff;
+  border-radius: 50px;
+  font-size: 24px;
+  padding: 10px 30px;
+  text-decoration: none;
+  text-shadow: 1px 1px 1px #59a24f;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  margin: 10px 20px 0 0;
+  -webkit-transition: all 0.25s ease;
+}
+
+a.button:hover {
+  background: #2f8325;
+  box-shadow: none;
+}

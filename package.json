@@ -1,0 +1,23 @@
+{
+    "name": "Intercom",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "express": "4.0.*",
+        "body-parser": "1.0.*",
+        "method-override": "1.0.*",
+        "dustjs-linkedin": "2.6.*",
+        "consolidate": "0.11.*",
+        "nano": "6.1.*",
+        "cfenv": "1.0.*",
+        "twilio": "2.0.*",
+        "watson-developer-cloud": "0.9.*"
+    },
+    "scripts": {
+        "start": "node app.js"
+    },
+    "engines": {
+        "node": "0.10.*"
+    },
+    "repository": {}
+}

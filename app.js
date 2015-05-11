@@ -31,7 +31,7 @@ var appEnv = cfenv.getAppEnv(appEnvOpts)
 //---Set up Cloudant------------------------------------------------------------
 var cloudantCreds = getServiceCreds(appEnv, "Cloudant"),
     nano = require("nano")(cloudantCreds.url),
-    db = nano.db.use("bluemix_events"),
+    db = nano.db.use("intercom"),
     dbHelper = require("./lib/cloudantHelper.js");
 
 //---Set up Twilio--------------------------------------------------------------
@@ -45,7 +45,7 @@ speechToTextCreds.version = "v1";
 var watson = require('watson-developer-cloud'),
     speechToText = watson.speech_to_text(speechToTextCreds);
 
-//---Handle HTTP Requests-------------------------------------------------------
+//---Web Page HTTP Requests-----------------------------------------------------
 
 // Splash screen
 app.get("/", function (request, response) {
@@ -72,8 +72,10 @@ app.get("/monitor", function (request, response) {
     });
 });
 
+//---Audio HTTP Requests--------------------------------------------------------
+
 // Post calls for parsing speech
-app.post('/', function(req, res) {
+app.post('/sample', function(req, res) {
   var audio;
   // Use sample audio to perform the speech-to-text functionality
   if(req.body.url && req.body.url.indexOf('audio/') === 0) {
@@ -110,94 +112,78 @@ app.post('/push', function(req, res) {
   res.json({"success":"true"});
 });
 
+//---DB HTTP Requests-----------------------------------------------------------
 
-// Getting list of all events
-app.get('/get_events', function(request, response) {
-  dbHelper.getRecords(db, 'events', 'events_index', function(result) {
+// Getting list of all bttns
+app.get('/db/get_bttns', function(request, response) {
+  dbHelper.getRecords(db, 'bttns', 'bttns_index', function(result) {
+    response.send(result);
+  });
+});
+
+// Getting list of all representatives
+app.get('/db/get_reps', function(request, response) {
+  dbHelper.getRecords(db, 'reps', 'reps_index', function(result) {
+    response.send(result);
+  });
+});
+
+// Getting list of all chats
+app.get('/db/get_chats', function(request, response) {
+  dbHelper.getRecords(db, 'chats', 'chats_index', function(result) {
     response.send(result);
   });
 });
 
 // Saving an event
-app.get('/save_event', function(request, response) {
-
-  // Build a DB events record from the received request
-  var eventRecord = {
-      'type': "event",
-      'clientInfo': {
-        'clientName' : request.query.clientName,
-        'clientIndustry' : request.query.clientIndustry,
-        'clientLocation' : {
-          'clientAddress' : request.query.clientAddress,
-          'clientCountry' : request.query.clientCountry,
-          'clientCity' : request.query.clientCity
-        }
-      },
-      'eventInfo' : {
-        'eventName' : request.query.eventName,
-        'eventType' : request.query.eventType,
-        'eventLocation' : {
-          'eventAddress' : request.query.eventAddress,
-          'eventCountry' : request.query.eventCountry,
-          'eventCity' : request.query.eventCity
-        }
-      },
-      'requestorInfo' : {
-        'requestorName' : request.query.requestorName,
-        'requestorEmail' : request.query.requestorEmail
-      },
-      'request' : {
-        'requestDate' : request.query.requestDate,
-        'requestStatus' : request.query.requestStatus,
-        'deliveryOwnership' : request.query.deliveryOwnership
-      },
-      'useCases' : request.query.useCases,
-      'expertise' : request.query.expertise,
-      'stakeholders' : request.query.stakeholders,
-      'salesConnectId' : request.query.salesConnectId,
-      'timeline' : request.query.timeline,
-      'priority' : request.query.priority,
-      'primaryOutcome' : request.query.primaryOutcome,
-      'salesOpportunity' : request.query.salesOpportunity,
-      'priorExposure' : request.query.priorExposure,
-      'compAssessment' : request.query.compAssessment,
+app.get('/db/save_chat', function(request, response) {
+  // Build a chat record from the received request
+  var chatRecord = {
+    'type': "chat",
   };
+  if (request.query.startTime) chatRecord.startTime = request.query.startTime;
+  if (request.query.chatStatus) chatRecord.chatStatus = request.query.chatStatus;
+  if (request.query.bttnId) chatRecord.bttnId = request.query.bttnId;
+  if (request.query.rep) chatRecord.repId = request.query.rep;
+  if (request.query.uniqueId) chatRecord._id = request.query.uniqueId;
+  if (request.query.revNum) chatRecord._rev = request.query.revNum;
 
-  if (request.query.uniqueId) {
-    eventRecord._id = request.query.uniqueId;
-  }
-  if (request.query.revNum)
-    eventRecord._rev = request.query.revNum;
-
-  // Insert event record into DB
-  dbHelper.insertRecord(db, eventRecord, function(result) {
-
-    // Text admins about an event creation
-    if (result === "Success" && !request.query.uniqueId)
-      textAdminsNewEvent(eventRecord);
-
+  // Insert chat record into DB
+  dbHelper.insertRecord(db, chatRecord, function(result) {
     response.send(result);
   });
 });
 
-// Delete an event from the DB
-app.get('/delete_event', function(request, response) {
-  dbHelper.deleteRecord(db, request.query.uniqueId, request.query.revNum, function(result) {
+// Saving a bttn
+app.get('/db/save_bttn', function(request, response) {
+  // Build a bttn record from the received request
+  var bttnRecord = {
+    'type': "bttn",
+  };
+  if (request.query.bttnName) bttnRecord.bttnName = request.query.bttnName;
+  if (request.query.bttnId) bttnRecord.bttnId = request.query.bttnId;
+  if (request.query.uniqueId) bttnRecord._id = request.query.uniqueId;
+  if (request.query.revNum) bttnRecord._rev = request.query.revNum;
+
+  // Insert bttn record into DB
+  dbHelper.insertRecord(db, bttnRecord, function(result) {
     response.send(result);
   });
 });
 
-// Saving an admin phone number
-app.get('/save_number', function(request, response) {
-
-  // Build a DB admin record
-  var adminPhoneRecord = {
-      'type': "admin",
-      'phone': request.query.phoneNum
+// Saving a representative
+app.get('/db/save_rep', function(request, response) {
+  // Build a representative record from the received request
+  var repRecord = {
+    'type': "rep",
   };
+  if (request.query.repName) repRecord.repName = request.query.repName;
+  if (request.query.repPhoneNum) repRecord.repPhoneNum = request.query.repPhoneNum;
+  if (request.query.uniqueId) repRecord._id = request.query.uniqueId;
+  if (request.query.revNum) repRecord._rev = request.query.revNum;
 
-  // Insert admin phone number into DB
-  dbHelper.insertRecord(db, adminPhoneRecord, function(result) {
+  // Insert representative record into DB
+  dbHelper.insertRecord(db, repRecord, function(result) {
     response.send(result);
   });
 });

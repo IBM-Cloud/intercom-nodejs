@@ -2,7 +2,6 @@
  *  @author Jake Peyser <jepeyser@us.ibm.com>
  *
  * @param {String} _options.ws  WebSocket URL
- * @param {String} _options.rep  Rep WebSocket URL
  * @param {String} _options.session_id  Socket session ID
  *
  */
@@ -10,7 +9,6 @@ function ConstantSocket(_options) {
   var options = _options || {};
 
   this.ws = options.ws || '';
-  this.rep = options.rep || '';
   this.session_id = options.session_id || '';
 
   var self = this;
@@ -35,6 +33,10 @@ function ConstantSocket(_options) {
 
   this.socket.on('bttn_push', function() {
     self.onBttnPush();
+  });
+
+  this.socket.on('answer', function(answerText) {
+    self.onAnswer(answerText);
   });
 
   this.socket.on('connect_failed', function() {
@@ -65,6 +67,7 @@ ConstantSocket.prototype.onQuestion = function(data) {
 ConstantSocket.prototype.onAnswer = function() {};
 ConstantSocket.prototype.onerror = function() {};
 ConstantSocket.prototype.onBttnPush = function() {};
+ConstantSocket.prototype.onChatUpdate = function() {};
 ConstantSocket.prototype.onEnd = function() {
   console.log('constantSocket.onEnd()');
   this.socket.emit('message', {disconnect:true});

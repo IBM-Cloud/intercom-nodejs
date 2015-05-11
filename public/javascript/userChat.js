@@ -3,13 +3,13 @@ function showBubble(isQuestion, text) {
   // Establish classes for new elements
   var columnClass, borderClass, borderTipClass, borderTextClass;
   if (isQuestion) {
-    columnClass = "col-md-offset-7 col-md-5";
+    columnClass = "col-lg-offset-7 col-md-offset-6 col-sm-offset-5 col-xs-offset-4 col-lg-5 col-md-6 col-sm-7 col-xs-8";
     borderClass = "question-border";
     borderTipClass = "question-border-tip";
     borderTextClass = "question-text";
   }
   else {
-    columnClass = "col-md-5";
+    columnClass = "col-lg-5 col-md-6 col-sm-7 col-xs-8";
     borderClass = "answer-border";
     borderTipClass = "answer-border-tip";
     borderTextClass = "answer-text";
@@ -39,18 +39,6 @@ function showBubble(isQuestion, text) {
     alignBubbleTipElements(true, 90, -8.8, -53);
     alignBubbleTipElements(false, 10, -1.9, 19);
   }
-}
-
-// Called when asking a question
-function ask(text) {
-  var myQuestion = text;
-  var questionEntity = {
-    'question' : myQuestion
-  };
-
-  showBubble(true, myQuestion);
-  showBubble(false, "This is a dummy response");
-  $('html, body').animate({ scrollTop : $(document).height() }, 'slow');
 }
 
 function alignBubbleTipElements(isQuestion, tipPercentOffset, dotOffset, barOffset)
@@ -119,3 +107,50 @@ $(window).resize(function() {
   alignBubbleTipElements(true, 90, -8.8, -53);
   alignBubbleTipElements(false, 10, -1.9, 19);
 });
+
+/**
+ *  @author Jake Peyser <jepeyser@us.ibm.com>
+ *
+ * @param {String} _options._id  Unique ID
+ * @param {String} _options._rev  Revision Number
+ * @param {String} _options.chatStatus  Helped Status
+ * @param {String} _options.startTime  Start Time
+ * @param {String} _options.rep  Representative Name
+ * @param {String} _options.bttnId  bttn ID
+ *
+ */
+function Chat(_options) {
+  var options = _options || {};
+
+  this._id = options._id || '';
+  this._rev = options._rev || '';
+  this.chatStatus = options.chatStatus || '';
+  this.startTime = options.startTime || '';
+  this.rep = options.rep || '';
+  this.bttnId = options.bttnId || '';
+
+  // Build HTTP GET URL
+  var url = "/db/save_chat?";
+  if (this.chatStatus) url += ("&chatStatus=" + this.chatStatus);
+  if (this.startTime) url += ("&startTime=" + this.startTime);
+  if (this.bttnId) url += ("&bttnId=" + this.bttnId);
+
+  // Create chat record in DB
+  $.ajax( {
+    url: url,
+    cache : false
+  }).done(function(data) {
+    if (data.ok === true) {
+      console.log("Created chat record successfully");
+      data.id = this._id;
+      data.rev = this._rev;
+    }
+    else {
+      console.error("Error saving the chat to the DB");
+      console.error(data);
+    }
+  });
+}
+
+// Functions used for chat events
+//ConstantSocket.prototype.onQuestion = function() {};

@@ -22,6 +22,24 @@ $(document).ready(function() {
       ws: ''
   });
 
+  // Chat object
+  var curChat = new Chat({
+      chatStatus : 'Initialized',
+      startTime : (new Date()).toString(),
+      bttnId : "10000080E1B4281F" //TODO: Use actual ID of Bttn from list
+  });
+
+  // Called when asking a question
+  function ask(text) {
+    var myQuestion = text;
+    var questionEntity = {
+      'question' : myQuestion
+    };
+
+    showBubble(true, myQuestion);
+    $('html, body').animate({ scrollTop : $(document).height() }, 'slow');
+  }
+
   speech.onstart = function() {
     console.log('chat.onstart()');
     recording = true;
@@ -89,9 +107,14 @@ $(document).ready(function() {
     showResult(data);
   };
 
-  mainSock.onBttnPush = function(error) {
+  mainSock.onBttnPush = function() {
     console.log('constantSocket.onBttnPush()');
     speech.start();
+  };
+
+  mainSock.onAnswer = function(answerText) {
+    showBubble(false, answerText);
+    $('html, body').animate({ scrollTop : $(document).height() }, 'slow');
   };
 
   mainSock.onerror = function(error) {

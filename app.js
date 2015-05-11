@@ -72,9 +72,9 @@ app.get("/monitor", function (request, response) {
     });
 });
 
+// Post calls for parsing speech
 app.post('/', function(req, res) {
   var audio;
-
   // Use sample audio to perform the speech-to-text functionality
   if(req.body.url && req.body.url.indexOf('audio/') === 0) {
     audio = fs.createReadStream(__dirname + '/../public/' + req.body.url);
@@ -83,7 +83,6 @@ app.post('/', function(req, res) {
     console.error("ERROR: The following URL is malformed ~ " + req.body.url);
     return res.status(500).json({ error: 'Malformed URL' });
   }
-
   // Parse the speech input from the user into text
   speechToText.recognize({audio: audio, content_type: 'audio/l16; rate=44100'}, function(err, transcript){
     if (err) {
@@ -94,6 +93,21 @@ app.post('/', function(req, res) {
     else
       return res.json(transcript);
   });
+});
+
+// Post calls for button pushes
+app.post('/push', function(req, res) {
+  console.log("bttn push received");
+  //TODO: Match bttn up against chats in progress
+
+  // Emit a bttn_push event to all active sockets
+  for (var value in sockets)
+  {
+    sockets[value].emit('bttn_push', {});
+  }
+
+  // Send result back
+  res.json({"success":"true"});
 });
 
 
@@ -191,7 +205,8 @@ app.get('/save_number', function(request, response) {
 //---Socket IO Handlers---------------------------------------------------------
 var server = http.Server(app),
     io = require('socket.io')(server),
-    sessions = {};
+    sessions = [],
+    sockets = [];
 
 
 var socketLog = function(id) {
@@ -238,10 +253,10 @@ io.use(function(socket, next) {
     else {
       sessions[socket.id] = session;
       sessions[socket.id].open = false;
+      sockets[socket.id] = socket;
       console.log(socketLog(socket.id), 'created session');
       console.log('The system now has:', Object.keys(sessions).length, 'sessions.');
       socket.emit('speech_session', session.session_id);
-
       next();
     }
   });
@@ -295,6 +310,7 @@ io.on('connection', function(socket) {
   socket.on('disconnect', function() {
     speechToText.deleteSession(session, function() {
       delete sessions[socket.id];
+      delete sockets[socket.id];
       console.log(socketLog(socket.id), 'delete_session');
     });
   });

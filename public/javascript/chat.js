@@ -64,12 +64,34 @@ $(document).ready(function() {
       mainSock.onQuestion(questionText);
       ask(questionText);
       transcript.empty();
+
+      /*var testQuestion = {
+        'question' : questionText
+      };
+      console.log(testQuestion);
+      console.log(JSON.stringify(testQuestion));
+      $.ajax({
+      url: '/push',
+      type: 'POST',
+      data: JSON.stringify(testQuestion),
+      success : function(res) {
+        console.log("Successful AJAX!");
+      },
+      error : function(res) {
+        console.log("AJAX Failure!");
+      }
+    });*/
     }
   };
 
   speech.onresult = function(data) {
     console.log('speech.onresult()');
     showResult(data);
+  };
+
+  mainSock.onBttnPush = function(error) {
+    console.log('constantSocket.onBttnPush()');
+    speech.start();
   };
 
   mainSock.onerror = function(error) {
@@ -98,10 +120,14 @@ $(document).ready(function() {
         console.log(text);
         //Capitalize first word
         text = text.charAt(0).toUpperCase() + text.substring(1);
-        // if final results, append a new paragraph
+        // if final results, append a new paragraph and end speech collection
         if (data.results[0].final){
           text = text.trim() + '.';
           $('<p></p>').appendTo(transcript);
+
+          speech.stop();
+          micButton.removeClass('recording');
+          micText.text('Processing speech');
         }
         paragraph.text(text);
       }

@@ -25,12 +25,16 @@ function ConstantSocket(_options) {
 
   this.socket.on('disconnect', function() {
     console.log('constantSocket.ondisconnect()');
-    self.onend();
+    self.onEnd();
   });
 
   this.socket.on('message_session', function(session) {
     console.log('Message session:', session);
     self.session_id = session;
+  });
+
+  this.socket.on('bttn_push', function() {
+    self.onBttnPush();
   });
 
   this.socket.on('connect_failed', function() {
@@ -60,6 +64,7 @@ ConstantSocket.prototype.onQuestion = function(data) {
 };
 ConstantSocket.prototype.onAnswer = function() {};
 ConstantSocket.prototype.onerror = function() {};
+ConstantSocket.prototype.onBttnPush = function() {};
 ConstantSocket.prototype.onEnd = function() {
   console.log('constantSocket.onEnd()');
   this.socket.emit('message', {disconnect:true});

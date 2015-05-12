@@ -20,12 +20,12 @@ $(document).ready(function() {
   // Messaging socket
   var mainSock = new ConstantSocket({
       ws : '',
-      bttnId : "10000080E1B4281F" //TODO: Use actual ID of Bttn from list
+      bttnId : "2406" //TODO: Use actual ID of Bttn from list
   });
 
   // Chat object
   var curChat = new Chat({
-      bttnId : "10000080E1B4281F" //TODO: Use actual ID of Bttn from list
+      bttnId : "2406" //TODO: Use actual ID of Bttn from list
   });
 
   // Called when asking a question
@@ -79,7 +79,7 @@ $(document).ready(function() {
 
       /*var buttonObject = {
         'bttnName' : "Intercom bttn",
-        'bttnId' : "10000080E1B4281F",
+        'bttnId' : "2406",
         'bttnLoc' : "Austin, TX",
         'bttnUrl' : "www.my.bt.tn/home",
         'callbackUrl' : "www.my.bt.tn/home/cb"
@@ -119,8 +119,9 @@ $(document).ready(function() {
         dateTime: startTime
       });
 
-      // Update chat record in DB
+      // Update chat and message record in DB
       curChat.saveChat("Asked");
+      curChat.saveQuestion(messageText);
     }
     else {
       var error = "Error emitting client_question socket event";

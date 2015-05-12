@@ -99,7 +99,7 @@ app.post('/sample', function(req, res) {
 
 // Post calls for button pushes
 app.post('/push', function(req, res) {
-  console.log("bttn " + req.body.bttnId + "push received");
+  console.log("bttn " + req.body.bttnId + " push received");
 
   // Emit a bttn_push event to all active sockets
   // Only chats associated with pushed bttn will catch event
@@ -148,6 +148,25 @@ app.get('/db/save_chat', function(request, response) {
 
   // Insert chat record into DB
   dbHelper.insertRecord(db, chatRecord, function(result) {
+    response.send(result);
+  });
+});
+
+// Saving a message record
+app.get('/db/save_msg', function(request, response) {
+  // Build a message record from the received request
+  var msgRecord = {
+    'type': "message",
+  };
+  if (request.query.chatId) msgRecord.chatId = request.query.chatId;
+  if (request.query.msgTxt) msgRecord.msgText = request.query.msgTxt;
+  if (request.query.msgTime) msgRecord.msgTime = request.query.msgTime;
+  if (request.query.subType) msgRecord.subType = request.query.subType;
+  if (request.query.uniqueId) msgRecord._id = request.query.uniqueId;
+  if (request.query.revNum) msgRecord._rev = request.query.revNum;
+
+  // Insert message record into DB
+  dbHelper.insertRecord(db, msgRecord, function(result) {
     response.send(result);
   });
 });

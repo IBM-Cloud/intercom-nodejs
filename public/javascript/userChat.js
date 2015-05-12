@@ -161,3 +161,33 @@ Chat.prototype.saveChat = function(status) {
     }
   });
 };
+
+/**
+ *  @author Jake Peyser <jepeyser@us.ibm.com>
+ *  Saves a question to the DB for the current chat
+ *
+ * @param {String} message  Question asked
+ *
+ */
+Chat.prototype.saveQuestion = function(message) {
+  // Build AJAX URL
+  var url = "/db/save_msg?";
+  url += "chatId=" + this._id;
+  url += "&msgTxt=" + message;
+  url += "&msgTime=" + (new Date()).toString();
+  url += "&subType=Q";
+
+  // Save message record in DB
+  $.ajax( {
+    url: url,
+    cache : false
+  }).done(function(data) {
+    if (data.ok === true) {
+      console.log("Added message record successfully");
+    }
+    else {
+      console.error("Error saving message record in DB");
+      console.error(data);
+    }
+  });
+};

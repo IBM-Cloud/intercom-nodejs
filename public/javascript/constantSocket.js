@@ -10,6 +10,7 @@ function ConstantSocket(_options) {
 
   this.ws = options.ws || '';
   this.session_id = options.session_id || '';
+  this.bttnId = options.bttnId || '';
 
   var self = this;
 
@@ -31,7 +32,7 @@ function ConstantSocket(_options) {
     self.session_id = session;
   });
 
-  this.socket.on('bttn_push', function() {
+  this.socket.on(this.bttnId, function() {
     self.onBttnPush();
   });
 
@@ -53,22 +54,19 @@ function ConstantSocket(_options) {
   this.socket.on('error', onError);
   this.socket.on('onerror', onError);
 
-  this.socket.on('message', function(msg){
+  this.socket.on('server_answer', function(msg){
     //console.log('constantSocket.onmessage():', msg);
     self.onAnswer(msg);
   });
 }
 
 // Functions used for main socket events.
-ConstantSocket.prototype.onQuestion = function(data) {
-  if (this.socket.connected)
-    this.socket.emit('message', {message: data});
-};
+ConstantSocket.prototype.onQuestion = function() {};
 ConstantSocket.prototype.onAnswer = function() {};
 ConstantSocket.prototype.onerror = function() {};
 ConstantSocket.prototype.onBttnPush = function() {};
 ConstantSocket.prototype.onChatUpdate = function() {};
 ConstantSocket.prototype.onEnd = function() {
   console.log('constantSocket.onEnd()');
-  this.socket.emit('message', {disconnect:true});
+  this.socket.emit('chat_disconnect');
 };

@@ -110,47 +110,54 @@ $(window).resize(function() {
 
 /**
  *  @author Jake Peyser <jepeyser@us.ibm.com>
+ *  Initializes a chat object
  *
- * @param {String} _options._id  Unique ID
- * @param {String} _options._rev  Revision Number
- * @param {String} _options.chatStatus  Helped Status
- * @param {String} _options.startTime  Start Time
- * @param {String} _options.rep  Representative Name
  * @param {String} _options.bttnId  bttn ID
  *
  */
 function Chat(_options) {
   var options = _options || {};
+  this.chatStatus = "Initialized";
+  this.startTime = (new Date()).toString();
+  this.bttnId = options.bttnId || 'DEFAULT_ID';
 
-  this._id = options._id || '';
-  this._rev = options._rev || '';
-  this.chatStatus = options.chatStatus || '';
-  this.startTime = options.startTime || '';
-  this.rep = options.rep || '';
-  this.bttnId = options.bttnId || '';
-
-  // Build HTTP GET URL
-  var url = "/db/save_chat?";
-  if (this.chatStatus) url += ("&chatStatus=" + this.chatStatus);
-  if (this.startTime) url += ("&startTime=" + this.startTime);
-  if (this.bttnId) url += ("&bttnId=" + this.bttnId);
+  var self = this;
 
   // Create chat record in DB
+  this.saveChat(this.chatStatus);
+}
+
+/**
+ *  @author Jake Peyser <jepeyser@us.ibm.com>
+ *  Given a status, creates or updates chat record in DB
+ *
+ * @param {String} status  Chat status
+ *
+ */
+Chat.prototype.saveChat = function(status) {
+  // Build AJAX URL
+  var url = "/db/save_chat?";
+  url += "chatStatus=" + status;
+  url += "&startTime=" + this.startTime;
+  url += "&bttnId=" + this.bttnId;
+  if (this.rep) url += ("&rep=" + this.rep);
+  if (this._id) url += ("&uniqueId=" + this._id);
+  if (this._rev) url += ("&revNum=" + this._rev);
+
+  // Save chat record in DB
+  var self = this;
   $.ajax( {
     url: url,
     cache : false
   }).done(function(data) {
     if (data.ok === true) {
-      console.log("Created chat record successfully");
-      data.id = this._id;
-      data.rev = this._rev;
+      console.log("Updated chat record successfully");
+      self._id = data.id;
+      self._rev = data.rev;
     }
     else {
-      console.error("Error saving the chat to the DB");
+      console.error("Error saving chat record in DB");
       console.error(data);
     }
   });
-}
-
-// Functions used for chat events
-//ConstantSocket.prototype.onQuestion = function() {};
+};

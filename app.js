@@ -99,14 +99,12 @@ app.post('/sample', function(req, res) {
 
 // Post calls for button pushes
 app.post('/push', function(req, res) {
-  console.log("bttn push received");
-  //TODO: Match bttn up against chats in progress
+  console.log("bttn " + req.body.bttnId + "push received");
 
   // Emit a bttn_push event to all active sockets
+  // Only chats associated with pushed bttn will catch event
   for (var value in sockets)
-  {
-    sockets[value].emit('bttn_push', {});
-  }
+    sockets[value].emit(req.body.bttnId, {});
 
   // Send result back
   res.json({"success":"true"});
@@ -135,7 +133,7 @@ app.get('/db/get_chats', function(request, response) {
   });
 });
 
-// Saving an event
+// Saving a chat record
 app.get('/db/save_chat', function(request, response) {
   // Build a chat record from the received request
   var chatRecord = {
@@ -154,7 +152,7 @@ app.get('/db/save_chat', function(request, response) {
   });
 });
 
-// Saving a bttn
+// Saving a bttn record
 app.get('/db/save_bttn', function(request, response) {
   // Build a bttn record from the received request
   var bttnRecord = {
@@ -171,7 +169,7 @@ app.get('/db/save_bttn', function(request, response) {
   });
 });
 
-// Saving a representative
+// Saving a representative record
 app.get('/db/save_rep', function(request, response) {
   // Build a representative record from the received request
   var repRecord = {
@@ -193,7 +191,6 @@ var server = http.Server(app),
     io = require('socket.io')(server),
     sessions = [],
     sockets = [];
-
 
 var socketLog = function(id) {
   return [
@@ -252,18 +249,12 @@ io.on('connection', function(socket) {
   var session = sessions[socket.id];
 
   // Catch socket.io message payload
-  socket.on('message', function(data) {
+  socket.on('client_question', function(data) {
     // If session is not open, begin the messaging session
     if (!session.open) {
       session.open = true;
     }
-    // If client sent disconnect message, end the /recognize request
-    if (data.disconnect) {
-      session.req.end();
-    }
-    else {
-      console.log("Question received: ", data);
-    }
+    console.log("Question received: ", data.message);
   });
 
   // Catch socket.io speech payload
@@ -283,13 +274,19 @@ io.on('connection', function(socket) {
       // GET /observeResult to get live transcripts
       speechToText.observeResult(payload, observe_results(socket, false));
     }
-    // If client sent disconnect message, end the /recognize request
-    else if (data.disconnect) {
-      session.req.end();
-    }
     else {
       session.req.write(data.audio);
     }
+  });
+
+  // Speech session was disconnected
+  socket.on('speech_disconnect', function(data) {
+    session.req.end();
+  });
+
+  // Chat was disconnected
+  socket.on('chat_disconnect', function(data) {
+    session.req.end();
   });
 
   // Delete the session on disconnect

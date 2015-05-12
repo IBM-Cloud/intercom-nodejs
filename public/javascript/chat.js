@@ -13,30 +13,24 @@ $(document).ready(function() {
   // Speech recording
   var recording = false,
     speech = new SpeechRecognizer({
-      ws: '',
-      model: 'WatsonModel'
+      ws : '',
+      model : 'WatsonModel'
     });
 
   // Messaging socket
   var mainSock = new ConstantSocket({
-      ws: ''
+      ws : '',
+      bttnId : "10000080E1B4281F" //TODO: Use actual ID of Bttn from list
   });
 
   // Chat object
   var curChat = new Chat({
-      chatStatus : 'Initialized',
-      startTime : (new Date()).toString(),
       bttnId : "10000080E1B4281F" //TODO: Use actual ID of Bttn from list
   });
 
   // Called when asking a question
   function ask(text) {
-    var myQuestion = text;
-    var questionEntity = {
-      'question' : myQuestion
-    };
-
-    showBubble(true, myQuestion);
+    showBubble(true, text);
     $('html, body').animate({ scrollTop : $(document).height() }, 'slow');
   }
 
@@ -83,33 +77,56 @@ $(document).ready(function() {
       ask(questionText);
       transcript.empty();
 
-      /*var testQuestion = {
-        'question' : questionText
+      /*var buttonObject = {
+        'bttnName' : "Intercom bttn",
+        'bttnId' : "10000080E1B4281F",
+        'bttnLoc' : "Austin, TX",
+        'bttnUrl' : "www.my.bt.tn/home",
+        'callbackUrl' : "www.my.bt.tn/home/cb"
       };
-      console.log(testQuestion);
-      console.log(JSON.stringify(testQuestion));
+      console.log(JSON.stringify(buttonObject));
       $.ajax({
       url: '/push',
+      contentType: "application/json",
       type: 'POST',
-      data: JSON.stringify(testQuestion),
+      data: JSON.stringify(buttonObject),
       success : function(res) {
-        console.log("Successful AJAX!");
+        console.log("Successful pushed!");
       },
       error : function(res) {
-        console.log("AJAX Failure!");
+        console.log("Push Failure!");
       }
     });*/
     }
   };
 
   speech.onresult = function(data) {
-    console.log('speech.onresult()');
     showResult(data);
   };
 
   mainSock.onBttnPush = function() {
     console.log('constantSocket.onBttnPush()');
     speech.start();
+  };
+
+  mainSock.onQuestion = function(messageText) {
+    if (this.socket.connected) {
+      var startTime = (new Date()).toString();
+      this.socket.emit('client_question', {
+        message: messageText,
+        chatId: curChat._id,
+        chatRev: curChat._rev,
+        dateTime: startTime
+      });
+
+      // Update chat record in DB
+      curChat.saveChat("Asked");
+    }
+    else {
+      var error = "Error emitting client_question socket event";
+      console.error(error);
+      displayError(error);
+    }
   };
 
   mainSock.onAnswer = function(answerText) {
@@ -140,7 +157,6 @@ $(document).ready(function() {
       if (data.results.length === 1 ) {
         var paragraph = transcript.children().last(),
           text = data.results[0].alternatives[0].transcript || '';
-        console.log(text);
         //Capitalize first word
         text = text.charAt(0).toUpperCase() + text.substring(1);
         // if final results, append a new paragraph and end speech collection

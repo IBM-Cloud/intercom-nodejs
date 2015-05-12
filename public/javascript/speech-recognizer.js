@@ -80,7 +80,7 @@ Microphone.prototype.onMediaStream =  function(stream) {
 
   // uncomment the following line if you want to use your microphone sample rate
   //this.sampleRate = this.audioContext.sampleRate;
-  console.log('Microphone.onMediaStream(): sampling rate is:', this.sampleRate);
+  //console.log('Microphone.onMediaStream(): sampling rate is:', this.sampleRate);
 
   this.mic.onaudioprocess = this._onaudioprocess.bind(this);
   this.stream = stream;
@@ -281,8 +281,7 @@ function SpeechRecognizer(_options) {
   };
 
   this.mic.onStopRecording = function() {
-    console.log('mic.onStopRecording()');
-    self.socket.emit('speech', {disconnect:true});
+    self.socket.emit('speech_disconnect');
   };
 }
 
@@ -297,7 +296,7 @@ SpeechRecognizer.prototype._init = function() {
     return;
   }
 
-  console.log('SpeechRecognizer._init():', this.ws);
+  //console.log('SpeechRecognizer._init():', this.ws);
   var self = this;
   this.socket = io.connect(this.ws);
 

@@ -26,7 +26,7 @@ try {
 catch (e) {}
 
 var appEnvOpts = vcapLocal ? {vcap:vcapLocal} : {}
-var appEnv = cfenv.getAppEnv(appEnvOpts)
+var appEnv = cfenv.getAppEnv(appEnvOpts);
 
 //---Set up Cloudant------------------------------------------------------------
 var cloudantCreds = getServiceCreds(appEnv, "Cloudant"),
@@ -103,8 +103,9 @@ app.post('/push', function(req, res) {
 
   // Emit a bttn_push event to all active sockets
   // Only chats associated with pushed bttn will catch event
+  var sockCall = "bttn_push_" + req.body.bttnId;
   for (var value in sockets)
-    sockets[value].emit(req.body.bttnId, {});
+    sockets[value].emit(sockCall, {});
 
   // Send result back
   res.json({"success":"true"});
@@ -131,6 +132,27 @@ app.get('/db/get_chats', function(request, response) {
   dbHelper.getRecords(db, 'chats', 'chats_index', function(result) {
     response.send(result);
   });
+});
+
+// Getting list of all chats
+app.get('/db/get_doc', function(request, response) {
+  dbHelper.getDoc(db, request.body.docName, request.body.params, function(result) {
+    response.send(result);
+  });
+  //RETURNING DB INFO
+  /*
+  { update_seq: '96-g1AAAAG9eJzLYWBg4MhgTmGQS0lKzi9KdUhJMtLLTMo1MLDUS87JL01JzCvRy0styQGqY0pkSJL___9_ViI_SIc8XIehAU4tSQpAMskerAvNHgvcmhxAmuLBmvhQNZni1pQA0lQP1sRGrI_yWIAkQwOQAuqbn5XISbTHIDoXQHTux3Anbs9BNB6AaLyflShErAchGh9ANAI9yZMFAKFrjng',
+  db_name: 'intercom',
+  sizes: { file: 1754684, external: 3634, active: 33200 },
+  purge_seq: 0,
+  other: { data_size: 3634 },
+  doc_del_count: 32,
+  doc_count: 16,
+  disk_size: 1754684,
+  disk_format_version: 6,
+  compact_running: false,
+  instance_start_time: '0' }
+  */
 });
 
 // Saving a chat record
@@ -196,6 +218,7 @@ app.get('/db/save_rep', function(request, response) {
   };
   if (request.query.repName) repRecord.repName = request.query.repName;
   if (request.query.repPhoneNum) repRecord.repPhoneNum = request.query.repPhoneNum;
+  if (request.query.state) repRecord.state = request.query.state;
   if (request.query.uniqueId) repRecord._id = request.query.uniqueId;
   if (request.query.revNum) repRecord._rev = request.query.revNum;
 
@@ -203,6 +226,106 @@ app.get('/db/save_rep', function(request, response) {
   dbHelper.insertRecord(db, repRecord, function(result) {
     response.send(result);
   });
+});
+
+//---Twilio HTTP Requests-----------------------------------------------------------
+
+// Getting list of all bttns
+app.get('/sms', function(request, response) {
+  console.log("Received a text message: " + request.query.Body + " from " + request.query.From);
+  console.log(request);
+  // Find rep with sender number in docs
+  dbHelper.getDoc(db, 'reps', 'reps_index', 'phoneNumber', request.query.From.substr(1), function(rep) {
+    // If rep was found, update rep record as busy
+    if (rep.phoneNumber) {
+      dbHelper.getDoc(db, 'chats', 'chats_index', 'rep', rep.uniqueId, function(chat) {
+        // Check that rep was assigned to chat
+        if (chat.uniqueId) {
+          // Rep is completing the conversation
+          if (request.query.Body === "COMPLETE") {
+            // Update rep record in DB
+              var repRecord = {
+                'type' : "rep",
+                'repName' : rep.name,
+                'repPhoneNum' : rep.phoneNumber,
+                'state' : "Available",
+                '_id' : rep.uniqueId,
+                '_rev' : rep.revNum
+              };
+              dbHelper.insertRecord(db, repRecord, function(result) {});
+
+            // Update chat record in DB
+              var chatRecord = {
+              'type' : "chat",
+              'startTime' : chat.startTime,
+              'chatStatus' : "Completed",
+              'bttnId' : chat.bttn,
+              'repId' : chat.rep,
+              '_id' : chat.uniqueId,
+              '_rev' : chat.revNum
+            };
+            dbHelper.insertRecord(db, chatRecord, function(result) {});
+
+            // Emit a notify socket event
+            var notifySockCall = "notify_" + chat.bttn;
+            for (var value in sockets) {
+              sockets[value].emit(notifySockCall, {
+                message : rep.name + " has ended the conversation. Have a good day!"
+              });
+            }
+
+            // Emit an end socket event
+            var endSockCall = "end_" + chat.bttn;
+            for (var value in sockets) {
+              sockets[value].emit(endSockCall);
+            }
+          }
+          // Else, they are answering the customer
+          else {
+            // Insert message record into DB
+            var msgRecord = {
+              'type' : "message",
+              'chatId' : chat.uniqueId,
+              'msgText' : request.query.Body,
+              'msgTime' : (new Date()).toString(),
+              'subType' : "A"
+            };
+            dbHelper.insertRecord(db, msgRecord, function(result) {});
+
+            // Update chat record in DB
+              var chatRecord = {
+              'type' : "chat",
+              'startTime' : chat.startTime,
+              'chatStatus' : "Answered",
+              'bttnId' : chat.bttn,
+              'repId' : chat.rep,
+              '_id' : chat.uniqueId,
+              '_rev' : chat.revNum
+            };
+            dbHelper.insertRecord(db, chatRecord, function(result) {});
+
+            // Emit an answer socket event
+            var sockCall = "answer_" + chat.bttn;
+            for (var value in sockets) {
+              sockets[value].emit(sockCall, {
+                message : request.query.Body,
+                rep : rep.name
+              });
+            }
+          }
+        }
+        // Else, rep was not associated with any chats
+        else {
+          console.log("Rep " + rep.uniqueId + " is not currently associated with any chats");
+        }
+      });
+    }
+    // Else, text was from unknown number
+    else {
+      console.log("Received text from unknown number: " + request.query.From);
+    }
+  });
+  response.send({"success":true});
 });
 
 //---Socket IO Handlers---------------------------------------------------------
@@ -267,13 +390,90 @@ io.use(function(socket, next) {
 io.on('connection', function(socket) {
   var session = sessions[socket.id];
 
-  // Catch socket.io message payload
+  // Catch questions coming from clients
   socket.on('client_question', function(data) {
     // If session is not open, begin the messaging session
     if (!session.open) {
       session.open = true;
     }
     console.log("Question received: ", data.message);
+
+    dbHelper.getDoc(db, 'chats', 'chats_index', 'uniqueId', data.chatId, function(chat) {
+      if (chat.uniqueId) {
+        // If chat has a rep, message the rep
+        if (chat.rep) {
+          dbHelper.getDoc(db, 'reps', 'reps_index', 'uniqueId', chat.rep, function(rep) {
+            if (rep.phoneNumber) {
+              // Send message to rep if not locally testing
+              if (!appEnv.isLocal)
+                twilioHelper.sendTextMessage(twilioClient, "15123086551", rep.phoneNumber, data.message);
+
+              // Update chat record in DB
+              var chatRecord = {
+                'type' : "chat",
+                'startTime' : chat.startTime,
+                'chatStatus' : "Asked",
+                'bttnId' : chat.bttn,
+                'repId' : chat.rep,
+                '_id' : chat.uniqueId,
+                '_rev' : chat.revNum
+              };
+              dbHelper.insertRecord(db, chatRecord, function(result) {});
+            }
+          });
+        }
+        // Else, assign a rep and message them
+        else {
+          dbHelper.getDoc(db, 'reps', 'reps_index', 'state', 'Available', function(rep) {
+            if (rep.phoneNumber) {
+              // Text the assigned rep
+              textRepNewChat(rep.phoneNumber, data.message);
+
+              // Update chat record in DB
+              var chatRecord = {
+                'type' : "chat",
+                'startTime' : chat.startTime,
+                'chatStatus' : "Asked",
+                'bttnId' : chat.bttn,
+                'repId' : rep.uniqueId,
+                '_id' : chat.uniqueId,
+                '_rev' : chat.revNum
+              };
+              dbHelper.insertRecord(db, chatRecord, function(result) {});
+
+              // Update rep record in DB
+              var repRecord = {
+                'type' : "rep",
+                'repName' : rep.name,
+                'repPhoneNum' : rep.phoneNumber,
+                'state' : "Busy",
+                '_id' : rep.uniqueId,
+                '_rev' : rep.revNum
+              };
+
+              dbHelper.insertRecord(db, repRecord, function(result) {});
+
+              // Emit a notify socket event
+              var sockCall = "notify_" + chat.bttn;
+              for (var value in sockets) {
+                sockets[value].emit(sockCall, {
+                  message : rep.name + " has been assigned to your case and will be with you shortly",
+                  repPhoneNum : rep.phoneNumber
+                });
+              }
+            }
+            else {
+              console.info("No available reps");
+              socket.emit('question_failed', "No representatives are currently available. Please try again later.");
+            }
+          });
+        }
+      }
+      else {
+        console.error("Chat corresponding to question asked not found in DB");
+        socket.emit('question_failed', "The system is currently experiencing issues. Please try again later.");
+      }
+    });
   });
 
   // Catch socket.io speech payload
@@ -300,11 +500,13 @@ io.on('connection', function(socket) {
 
   // Speech session was disconnected
   socket.on('speech_disconnect', function(data) {
+    var session = sessions[socket.id];
     session.req.end();
   });
 
   // Chat was disconnected
   socket.on('chat_disconnect', function(data) {
+    var session = sessions[socket.id];
     session.req.end();
   });
 
@@ -320,15 +522,17 @@ io.on('connection', function(socket) {
 
 //---Start HTTP Server----------------------------------------------------------
 server.listen(appEnv.port, function() {
-    console.log("server started on port " + appEnv.port);
+  console.log("server started on port " + appEnv.port);
 });
 
 //---Process Ending Handlers----------------------------------------------------
 process.on("exit", function(code) {
+  // TODO: Set all chats to 'Terminated' and reps to 'Available'
   console.log("exiting with code: " + code);
 })
 
 process.on("uncaughtException", function(err) {
+  // TODO: Set all chats to 'Terminated' and reps to 'Available'
   console.log("exiting on uncaught exception: " + err.stack);
   process.exit(1);
 })
@@ -342,27 +546,16 @@ function getServiceCreds(appEnv, serviceName) {
     console.log("service " + serviceName + " not bound to this application");
     return null;
   }
-
   return serviceCreds;
 }
 
-// Texts the admins who opted in for new event notifications
-function textAdminsNewEvent(eventRecord) {
-  dbHelper.getRecords(db, 'admins_1', 'admins_index', function(result) {
-    // If error getting the phone numbers, just return
-    if (result.error)
-      return;
+function textRepNewChat(phoneNum, question) {
 
-    // Generate a text message to send admins
-    var message = eventRecord.requestorInfo.requestorName +
-      " just requested an event for " + eventRecord.clientInfo.clientName +
-      " called " + eventRecord.eventInfo.eventName +
-      ". Check out Bluemix Events to vet this request!";
+  var message = 'You have been assigned to help a customer with the following question: "' +
+    question + '" Please reply with an answer or a follow-up question.' +
+    " When the customer is satisfied, reply COMPLETE to end the chat.";
 
-    // Text each subscribed admin about the new event
-    var adminNums = JSON.parse(result);
-    for (var i=0; i < adminNums.length; i++) {
-      twilioHelper.sendTextMessage(twilioClient, "15123086551", adminNums[i].phone, message);
-    }
-  });
+  // Send message to rep if not locally testing
+  if (!appEnv.isLocal)
+    twilioHelper.sendTextMessage(twilioClient, "15123086551", phoneNum, message);
 }

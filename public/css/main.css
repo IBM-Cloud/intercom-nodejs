@@ -77,6 +77,15 @@ html, body {
   clear: both;
 }
 
+.notification-border {
+  position:relative;
+  margin:5px 5px;
+  padding:10px 10px;
+  text-align:center;
+  color:#333;
+  background:#dfe6eb;
+}
+
 .question-border {
   position:relative;
   min-width: 200px;
@@ -243,6 +252,19 @@ html, body {
   width: 100%;
 }
 
+.dummyMsgBtn {
+  background: url('../images/forum_32.png') no-repeat;
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+  cursor: pointer;
+  margin: 5px 0px;
+}
+
+#dummyMsg {
+  width: 100%;
+}
+
 .micButton {
   background: url('../images/microphone.svg') no-repeat;
   width: 120px;
@@ -272,6 +294,10 @@ html, body {
 
 .question-text, .answer-text{
   font-size: 20px;
+}
+
+.notification-text{
+  font-size: 14px;
 }
 
 .well {

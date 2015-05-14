@@ -17,15 +17,32 @@
         <div id="spokenText"></div>
       </div>
     </div>
+    <div class="dummyMsgBtn"></div>
   </div>
   <div class="row">
     <div class="col-lg-12 col-md-12 col-xs-12">
-      <div class="mic">
+      <div class="mic" id="mic">
         <div class="micButton"></div>
         <p class="micText">Press bttn to start speaking</p>
       </div>
     </div>
   </div>
 </div>
+<div class="modal fade" id="dummyTextModal" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Send Dummy Message</h4>
+      </div>
+      <div class="modal-body">
+        <input id="dummyMsg" type="text" placeholder="Enter message here">
+      </div><!-- /.modal-body -->
+      <div class="modal-footer">
+        <button type="button" id="dummyMsgSendBtn" class="btn btn-primary">Send</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 {/content}

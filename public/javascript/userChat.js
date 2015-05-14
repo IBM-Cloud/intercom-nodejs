@@ -41,23 +41,41 @@ function showBubble(isQuestion, text) {
   }
 }
 
-function alignBubbleTipElements(isQuestion, tipPercentOffset, dotOffset, barOffset)
-{
+function showNotification(text) {
+
+  var columnClass = "col-lg-offset-3 col-md-offset-2 col-sm-offset-1 col-xs-offset-1 col-lg-6 col-md-8 col-sm-10 col-xs-10",
+      notificationClass = "notification-border";
+      textClass = "notification-text";
+
+  // Create HTML element for displaying notification
+  var row = document.createElement('div');
+  row.setAttribute('class', "row");
+  document.getElementById('conversation').appendChild(row);
+  var column = document.createElement('div');
+  column.setAttribute('class', columnClass);
+  row.appendChild(column);
+  var bubble = document.createElement('div');
+  bubble.setAttribute('class', notificationClass);
+  column.appendChild(bubble);
+  var notificationText = document.createElement('p');
+  notificationText.setAttribute('class', textClass);
+  notificationText.innerHTML = text;
+  bubble.appendChild(notificationText);
+}
+
+function alignBubbleTipElements(isQuestion, tipPercentOffset, dotOffset, barOffset) {
   var className = (isQuestion) ? "question" : "answer";
   // Get the left position of the bubble tip
   var bubbleFields = document.getElementsByClassName(className + "-border");
-  if (bubbleFields.length > 0)
-  {
+  if (bubbleFields.length > 0) {
     var bubbleWidth = bubbleFields[0].offsetWidth;
 
     var styleRules = document.styleSheets[1].cssRules;
     var foundElements = 0;
     var borderTipBeforeIndex, borderTipAfterIndex;
-    for (var i=0; i < styleRules.length; i++)
-    {
+    for (var i=0; i < styleRules.length; i++) {
       // Get the left percentage value of the border tip's large curve
-      if (styleRules[i].selectorText === ("." + className + "-border::before"))
-      {
+      if (styleRules[i].selectorText === ("." + className + "-border::before")) {
         if (isQuestion)
           styleRules[i].style.left = ((bubbleWidth * (tipPercentOffset/100)) - 57).toString() + "px";
         else
@@ -67,8 +85,7 @@ function alignBubbleTipElements(isQuestion, tipPercentOffset, dotOffset, barOffs
       }
 
       // Get the left percentage value of the border tip's small curve
-      else if (styleRules[i].selectorText === ("." + className + "-border::after"))
-      {
+      else if (styleRules[i].selectorText === ("." + className + "-border::after")) {
         if (isQuestion)
           styleRules[i].style.left = ((bubbleWidth * (tipPercentOffset/100)) - 27).toString() + "px";
         else
@@ -78,16 +95,14 @@ function alignBubbleTipElements(isQuestion, tipPercentOffset, dotOffset, barOffs
       }
 
       // Get the index of the border tip dot element
-      else if (styleRules[i].selectorText === ("." + className + "-border-tip::before"))
-      {
+      else if (styleRules[i].selectorText === ("." + className + "-border-tip::before")) {
         borderTipBeforeIndex = i;
         if (foundElements === 3) break;
         foundElements++;
       }
 
       // Get the index of the border tip bar element
-      else if (styleRules[i].selectorText === ("." + className + "-border-tip::after"))
-      {
+      else if (styleRules[i].selectorText === ("." + className + "-border-tip::after")) {
         borderTipAfterIndex = i;
         if (foundElements === 3) break;
         foundElements++;

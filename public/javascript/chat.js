@@ -8,7 +8,9 @@ $(document).ready(function() {
   var micButton = $('.micButton'),
     micText = $('.micText'),
     transcript = $('#spokenText'),
-    errorMsg = $('.errorMsg');
+    errorMsg = $('.errorMsg'),
+    dummyMsgBtn = $('.dummyMsgBtn'),
+    dummyMsgSendBtn = $('#dummyMsgSendBtn');
 
   // Speech recording
   var recording = false,
@@ -27,6 +29,19 @@ $(document).ready(function() {
   var curChat = new Chat({
       bttnId : "2406" //TODO: Use actual ID of Bttn from list
   });
+  mainSock._id = curChat._id;
+
+  // Set up modal click/send/hide functionality
+  dummyMsgBtn.click(function() {
+    $('#dummyTextModal').modal('show');
+  });
+  dummyMsgSendBtn.click(function() {
+    mainSock.onDummyAnswer(document.getElementById('dummyMsg').value);
+    $('#dummyTextModal').modal('hide');
+  });
+  $('#dummyTextModal').on('hidden.bs.modal', function () {
+    document.getElementById('dummyMsg').value = "";
+  })
 
   // Called when asking a question
   function ask(text) {
@@ -38,7 +53,7 @@ $(document).ready(function() {
     console.log('chat.onstart()');
     recording = true;
     micButton.addClass('recording');
-    micText.text('Press bttn again when finished');
+    micText.text('Stop speaking when finished');
     errorMsg.hide();
     transcript.show();
 
@@ -76,27 +91,6 @@ $(document).ready(function() {
       mainSock.onQuestion(questionText);
       ask(questionText);
       transcript.empty();
-
-      /*var buttonObject = {
-        'bttnName' : "Intercom bttn",
-        'bttnId' : "2406",
-        'bttnLoc' : "Austin, TX",
-        'bttnUrl' : "www.my.bt.tn/home",
-        'callbackUrl' : "www.my.bt.tn/home/cb"
-      };
-      console.log(JSON.stringify(buttonObject));
-      $.ajax({
-      url: '/push',
-      contentType: "application/json",
-      type: 'POST',
-      data: JSON.stringify(buttonObject),
-      success : function(res) {
-        console.log("Successful pushed!");
-      },
-      error : function(res) {
-        console.log("Push Failure!");
-      }
-    });*/
     }
   };
 
@@ -114,13 +108,10 @@ $(document).ready(function() {
       var startTime = (new Date()).toString();
       this.socket.emit('client_question', {
         message: messageText,
-        chatId: curChat._id,
-        chatRev: curChat._rev,
-        dateTime: startTime
+        chatId: curChat._id
       });
 
       // Update chat and message record in DB
-      curChat.saveChat("Asked");
       curChat.saveQuestion(messageText);
     }
     else {
@@ -130,9 +121,70 @@ $(document).ready(function() {
     }
   };
 
-  mainSock.onAnswer = function(answerText) {
+  mainSock.onAnswer = function(answerText, repName) {
     showBubble(false, answerText);
     $('html, body').animate({ scrollTop : $(document).height() }, 'slow');
+  };
+
+  mainSock.onDummyAnswer = function(answerText) {
+    console.log("Sending dummy text: " + answerText);
+    // Change answer text to valid URL format
+    answerText = answerText.trim().split(' ').join('+');
+
+    // Generate random SMS message Sid
+    var chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        length = 32,
+        sid = '';
+    for (var i = length; i > 0; --i) sid += chars[Math.round(Math.random() * (chars.length - 1))];
+
+    // Build AJAX URL
+    var url = "/sms?";
+    url += "ToCountry=US";
+    url += "&ToState=TX";
+    url += "&SmsMessageSid=SM" + sid;
+    url += "&NumMedia=0";
+    url += "&ToCity=BASTROP";
+    url += "&FromZip=06850";
+    url += "&SmsSid=SM" + sid;
+    url += "&FromZip=78746";
+    url += "&FromState=TX";
+    url += "&SmsStatus=received";
+    url += "&FromCity=AUSTIN";
+    url += "&Body=" + answerText;
+    url += "&FromCountry=US";
+    url += "&To=%2B15123086551";
+    url += "&ToZip=78662";
+    url += "&MessageSid=SMfa05566cf07a7c49f0aa38587c624b48";
+    url += "&AccountSid=ACa9d050536caa254ab4ba274781a1fef0";
+    url += "&From=%2B" + mainSock.repPhoneNum;
+    url += "&ApiVersion=%2010-04-01";
+
+    // Send dummy text message
+    $.ajax( {
+      url: url,
+      cache : false
+    }).done(function(data) {
+      if (data.success === true) {
+        console.log("Sent dummy message successfully");
+      }
+      else {
+        console.error("Error sending dummy message");
+        console.error(data);
+      }
+    });
+  };
+
+  mainSock.onNotification = function(notificationText) {
+    showNotification(notificationText);
+    $('html, body').animate({ scrollTop : $(document).height() }, 'slow');
+  };
+
+  mainSock.onEnd = function() {
+    console.log('constantSocket.onEnd()');
+    mainSock.socket.emit('chat_disconnect');
+
+    // Hide mic elements
+    document.getElementById("mic").style.display = "none";
   };
 
   mainSock.onerror = function(error) {
@@ -176,6 +228,7 @@ $(document).ready(function() {
   }
 
   function displayError(error) {
+    console.log(error);
     var message = error;
     try {
       var errorJson = JSON.parse(error);

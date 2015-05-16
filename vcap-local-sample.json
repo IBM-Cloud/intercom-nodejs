@@ -1,0 +1,50 @@
+{
+   "services": {
+      "user-provided": [
+         {
+            "name": "Twilio",
+            "label": "user-provided",
+            "credentials": {
+               "url": "https://api.twilio.com",
+               "accountSID": "USER_SID",
+               "authToken": "USER_AUTH_TOKEN"
+            }
+         },
+         {
+            "name": "CloudantCleanser",
+            "label": "user-provided",
+            "credentials": {
+               "url": "https://intercom.mybluemix.net/db/reset",
+               "password": "USER_PASSWORD",
+               "username": "USER_NAME"
+            }
+         }
+      ],
+      "speech_to_text": [
+         {
+            "name": "SpeechToText",
+            "label": "speech_to_text",
+            "plan": "free",
+            "credentials": {
+               "url": "https://stream.watsonplatform.net/speech-to-text-beta/api",
+               "username": "USER_NAME",
+               "password": "PASSWORD"
+            }
+         }
+      ],
+      "cloudantNoSQLDB": [
+         {
+            "name": "Cloudant",
+            "label": "cloudantNoSQLDB",
+            "plan": "Shared",
+            "credentials": {
+               "username": "USER_NAME",
+               "password": "PASSWORD",
+               "host": "USERNAME.cloudant.com",
+               "port": 443,
+               "url": "https://USERNAME:PASSWORD@USER_NAME.cloudant.com"
+            }
+         }
+      ]
+   }
+}

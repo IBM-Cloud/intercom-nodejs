@@ -74,9 +74,9 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document: _design/bttns<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Index name: bttns_index<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Map function:<br>
-      <pre>```sh
+      '''sh<pre>
       function(doc) {
-      &nbsp;&nbsp;if (doc.type === 'bttn') {
+        if (doc.type === 'bttn') {
           emit(doc._id, {
             uniqueId : doc._id,
             revNum : doc._rev,
@@ -85,7 +85,7 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
           });
         }
       }
-      ```</pre>
+      </pre>```
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ii. Chats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document: _design/chats<br>

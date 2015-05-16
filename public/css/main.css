@@ -15,6 +15,10 @@ html, body {
   position: relative;
 }
 
+#chat-container {
+  padding: 0px 5px;
+}
+
 .jumbotron {
   margin-bottom: 20px;
   padding-top: 20px;

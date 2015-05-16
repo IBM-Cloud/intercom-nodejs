@@ -1,0 +1,50 @@
+{
+   "services": {
+      "user-provided": [
+         {
+            "name": "Twilio",
+            "label": "user-provided",
+            "credentials": {
+               "url": "https://api.twilio.com",
+               "accountSID": "ACa9d050536caa254ab4ba274781a1fef0",
+               "authToken": "ead15c2017c547d5e3013a14bb733af7"
+            }
+         },
+         {
+            "name": "CloudantCleanser",
+            "label": "user-provided",
+            "credentials": {
+               "url": "https://intercom.mybluemix.net/db/reset",
+               "password": "R7JL12JJ88lQpkxP1pvu",
+               "username": "master_bluemix"
+            }
+         }
+      ],
+      "speech_to_text": [
+         {
+            "name": "SpeechToText",
+            "label": "speech_to_text",
+            "plan": "free",
+            "credentials": {
+               "url": "https://stream.watsonplatform.net/speech-to-text-beta/api",
+               "username": "2983ae32-eaf4-49d2-820c-9f263842ddf7",
+               "password": "DKtjDZJEIS4R"
+            }
+         }
+      ],
+      "cloudantNoSQLDB": [
+         {
+            "name": "Cloudant",
+            "label": "cloudantNoSQLDB",
+            "plan": "Shared",
+            "credentials": {
+               "username": "2008c25b-2385-43aa-af80-63e2f24e0c23-bluemix",
+               "password": "eb4cc46656237c006e23384dc633e4177a2b9faf594fa26eed38613fe6889234",
+               "host": "2008c25b-2385-43aa-af80-63e2f24e0c23-bluemix.cloudant.com",
+               "port": 443,
+               "url": "https://2008c25b-2385-43aa-af80-63e2f24e0c23-bluemix:eb4cc46656237c006e23384dc633e4177a2b9faf594fa26eed38613fe6889234@2008c25b-2385-43aa-af80-63e2f24e0c23-bluemix.cloudant.com"
+            }
+         }
+      ]
+   }
+}

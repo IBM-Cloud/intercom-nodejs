@@ -1,38 +1,31 @@
 # Overview
 
-Intercom allows users to initiate and participate in remote chats
-with various experts through voice communication.
+Intercom allows users to remotely chat with representatives using Watson [Speech to Text][speech_text_url] technology. The representatives are notified via text and can reply directly to the user by SMS using the [Twilio APIs][twilio_url]. All of this is kicked off at the push of a [bttn][bttn_url], enabling users to comminute with ultimate ease by completely avoid manual input into the app.
 
+[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/IBM-Bluemix/intercom-nodejs)
 
-## Files
+## How it Works
 
-The Node.js application has files as below:
+1. Push the bttn to start a conversation
 
-*   app.js
+2. Once the mic is flashing red, start recording your message. The app will automatically detect when you are done speaking and send the message. Your chat will be automatically assigned to an available representative.
 
-	This file contains the server side JavaScript code for the application written using node.js
+3. Using Twilio, the rep will respond to your inquiry
 
-*   package.json
+4. This manner of communication can continue as long as either party would like. Once the rep has decided that they have addressed the user's concerns, they will end the chat.
 
-	This file is required by the node.js runtime. It specifies the node.js project name, dependencies, and other configurations of your node.js application.
+5. Rinse and repeat to your heart's content!
 
-*   node_modules/
+## Architecture Diagram
 
-<<<<<<< HEAD
-	This directory contains the modules used and referenced in the application. It is required by the express framework.
-=======
 <img src="https://raw.githubusercontent.com/IBM-Bluemix/intercom-nodejs/master/public/images/diagram.png" width="650px"><br>This an architectural overview of the systems that make this app run.<br>
->>>>>>> master
 
-*   public/
+## Getting Started
 
-	This directory contains public resources of the application. It contains the images, CSS, and JS resources. It is required by the express framework.
+1. Create a Bluemix Account
 
-*   views/
+    [Sign up][sign_up_url] in Bluemix, or use an existing account.
 
-<<<<<<< HEAD
-	This directory contains the .dust files used to deliver the views to the client accessing the application.
-=======
 2. Download and install the [Cloud-foundry CLI][cloud_foundry_url] tool
 
 3. Edit the `manifest.yml` file and change the `<application-name>` and `<application-host>` to something unique.
@@ -163,4 +156,3 @@ To troubleshoot your Bluemix app the main useful source of information are the l
 [bttn_url]: http://bt.tn/
 [sign_up_url]: https://apps.admin.ibmcloud.com/manage/trial/bluemix.html
 [cloud_foundry_url]: https://github.com/cloudfoundry/cli
->>>>>>> master

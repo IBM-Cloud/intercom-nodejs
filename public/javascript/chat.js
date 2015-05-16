@@ -34,6 +34,8 @@ $(document).ready(function() {
   // Set up modal click/send/hide functionality
   dummyMsgBtn.click(function() {
     $('#dummyTextModal').modal('show');
+    console.log(document.getElementById('dummyMsg').focus());
+    document.getElementById('dummyMsg').focus();
   });
   dummyMsgSendBtn.click(function() {
     mainSock.onDummyAnswer(document.getElementById('dummyMsg').value);

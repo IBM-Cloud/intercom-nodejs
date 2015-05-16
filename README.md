@@ -18,7 +18,7 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
 
 ## Architecture Diagram
 
-<img src="https://raw.githubusercontent.com/IBM-Bluemix/intercom-nodejs/master/public/images/diagram.png" width="650px"><br>This an architectural overview of the systems that make this app run.<br> |
+<img src="https://raw.githubusercontent.com/IBM-Bluemix/intercom-nodejs/master/public/images/diagram.png" width="650px"><br>This an architectural overview of the systems that make this app run.<br>
 
 ## Getting Started
 
@@ -68,11 +68,23 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
   $ cf cups CloudantCleanser -p '{"host":"https://YOUR_HOST_NAME.mybluemix.net/db/reset","username":"YOUR_USER_NAME","password":"YOUR_PASSWORD"}'
   ```
 10. Enter the Cloudant dashboard and do the following:
+
+<br>
   a. Create a DB called 'intercom'
+
+<br>
   b. Create the following design docs:
+
+<br>
     i. Bttns
+
+<br>
     Document: _design/bttns
+
+<br>
     Index name: bttns_index
+
+<br>
     Map function:
       ```sh
       function(doc) {
@@ -86,9 +98,16 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
         }
       }
       ```
+<br>
     ii. Chats
+
+<br>
     Document: _design/chats
+
+<br>
     Index name: chats_index
+
+<br>
     Map function:
       ```sh
       function(doc) {
@@ -104,9 +123,16 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
           }
       }
       ```
+<br>
     iii. Messages
+
+<br>
     Document: _design/messages
+
+<br>
     Index name: messages_index
+
+<br>
     Map function:
       ```sh
       function(doc) {
@@ -122,9 +148,16 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
           }
       }
       ```
+<br>
     iv. Reps
+
+<br>
     Document: _design/reps
+
+<br>
     Index name: reps_index
+
+<br>
     Map function:
       ```sh
       function(doc) {

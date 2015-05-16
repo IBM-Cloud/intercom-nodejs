@@ -7,7 +7,7 @@
   </div>
 </div><!-- /.jumbotron -->
 
-<div class="container-fluid">
+<div class="container-fluid" id="chat-container>
   <div id="conversation"></div>
   <br>
   <div class="row">

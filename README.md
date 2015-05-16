@@ -67,24 +67,13 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
   ```sh
   $ cf cups CloudantCleanser -p '{"host":"https://YOUR_HOST_NAME.mybluemix.net/db/reset","username":"YOUR_USER_NAME","password":"YOUR_PASSWORD"}'
   ```
-10. Enter the Cloudant dashboard and do the following:
-<br>
-&nbsp;&nbsp;&nbsp;a. Create a DB called 'intercom'
-
-<br>
-  b. Create the following design docs:
-
-<br>
-    i. Bttns
-
-<br>
-    Document: _design/bttns
-
-<br>
-    Index name: bttns_index
-
-<br>
-    Map function:
+10. Enter the Cloudant dashboard and do the following:<br>
+&nbsp;&nbsp;&nbsp;a. Create a DB called 'intercom'<br>
+&nbsp;&nbsp;&nbsp;b. Create the following design docs:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i. Bttns<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document: _design/bttns<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Index name: bttns_index<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Map function:<br>
       ```sh
       function(doc) {
         if (doc.type === 'bttn') {
@@ -98,16 +87,10 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
       }
       ```
 <br>
-    ii. Chats
-
-<br>
-    Document: _design/chats
-
-<br>
-    Index name: chats_index
-
-<br>
-    Map function:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ii. Chats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document: _design/chats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Index name: chats_index<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Map function:<br>
       ```sh
       function(doc) {
           if (doc.type === 'chat') {
@@ -123,16 +106,10 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
       }
       ```
 <br>
-    iii. Messages
-
-<br>
-    Document: _design/messages
-
-<br>
-    Index name: messages_index
-
-<br>
-    Map function:
+    iii. Messages<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document: _design/messages<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Index name: messages_index<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Map function:<br>
       ```sh
       function(doc) {
           if (doc.type === 'chat') {
@@ -148,16 +125,10 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
       }
       ```
 <br>
-    iv. Reps
-
-<br>
-    Document: _design/reps
-
-<br>
-    Index name: reps_index
-
-<br>
-    Map function:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;iv. Reps<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document: _design/reps<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Index name: reps_index<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Map function:<br>
       ```sh
       function(doc) {
           if (doc.type === 'rep') {

@@ -63,7 +63,7 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
 
 8. Create a Twilio service by adding it in the catalog, inputting your Account SID and Auth Token, and binding the service to your app.
 
-9. Create a customer user provided service to store your DB reset credentials
+9. Create a user provided service to store your DB reset credentials
   ```sh
   $ cf cups CloudantCleanser -p '{"host":"https://YOUR_HOST_NAME.mybluemix.net/db/reset","username":"YOUR_USER_NAME","password":"YOUR_PASSWORD"}'
   ```
@@ -74,9 +74,9 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document: _design/bttns<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Index name: bttns_index<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Map function:<br>
-      ```sh
+      <pre>```sh
       function(doc) {
-        if (doc.type === 'bttn') {
+      &nbsp;&nbsp;if (doc.type === 'bttn') {
           emit(doc._id, {
             uniqueId : doc._id,
             revNum : doc._rev,
@@ -85,7 +85,7 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
           });
         }
       }
-      ```
+      ```</pre>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ii. Chats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document: _design/chats<br>
@@ -93,16 +93,16 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Map function:<br>
       ```sh
       function(doc) {
-          if (doc.type === 'chat') {
-            emit(doc._id, {
-              uniqueId : doc._id,
-              revNum : doc._rev,
-              startTime : doc.startTime,
-              chatStatus : doc.chatStatus,
-              bttn : doc.bttnId,
-              rep : doc.repId
-            });
-          }
+        if (doc.type === 'chat') {
+          emit(doc._id, {
+            uniqueId : doc._id,
+            revNum : doc._rev,
+            startTime : doc.startTime,
+            chatStatus : doc.chatStatus,
+            bttn : doc.bttnId,
+            rep : doc.repId
+          });
+        }
       }
       ```
 <br>
@@ -112,14 +112,14 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Map function:<br>
       ```sh
       function(doc) {
-          if (doc.type === 'chat') {
+          if (doc.type === 'message') {
             emit(doc._id, {
               uniqueId : doc._id,
               revNum : doc._rev,
-              startTime : doc.startTime,
-              chatStatus : doc.chatStatus,
-              bttn : doc.bttnId,
-              rep : doc.repId
+              chatId : doc.chatId,
+              message : doc.messageText,
+              date : doc.dateTime,
+              subType : doc.subType
             });
           }
       }
@@ -131,15 +131,15 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Map function:<br>
       ```sh
       function(doc) {
-          if (doc.type === 'rep') {
-            emit(doc._id, {
-              uniqueId : doc._id,
-              revNum : doc._rev,
-              name : doc.repName,
-              phoneNumber : doc.repPhoneNum,
-              state : doc.state
-            });
-          }
+        if (doc.type === 'rep') {
+          emit(doc._id, {
+            uniqueId : doc._id,
+            revNum : doc._rev,
+            name : doc.repName,
+            phoneNumber : doc.repPhoneNum,
+            state : doc.state
+          });
+        }
       }
       ```
 

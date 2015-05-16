@@ -84,14 +84,13 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
             bttnId : doc.bttnId
           });
         }
-      }
-      </pre>```
+      }</pre>```
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ii. Chats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document: _design/chats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Index name: chats_index<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Map function:<br>
-      ```sh
+      ```sh<pre>
       function(doc) {
         if (doc.type === 'chat') {
           emit(doc._id, {
@@ -103,14 +102,13 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
             rep : doc.repId
           });
         }
-      }
-      ```
+      }</pre>```
 <br>
     iii. Messages<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document: _design/messages<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Index name: messages_index<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Map function:<br>
-      ```sh
+      ```sh<pre>
       function(doc) {
           if (doc.type === 'message') {
             emit(doc._id, {
@@ -122,14 +120,13 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
               subType : doc.subType
             });
           }
-      }
-      ```
+      }</pre>```
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;iv. Reps<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document: _design/reps<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Index name: reps_index<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Map function:<br>
-      ```sh
+      ```sh<pre>
       function(doc) {
         if (doc.type === 'rep') {
           emit(doc._id, {
@@ -140,8 +137,7 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
             state : doc.state
           });
         }
-      }
-      ```
+      }</pre>```
 
 ## Troubleshooting
 

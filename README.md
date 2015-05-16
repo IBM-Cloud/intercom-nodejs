@@ -85,7 +85,6 @@ Intercom allows users to remotely chat with representatives using Watson [Speech
           });
         }
       }</pre>
-      ```
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ii. Chats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Document: _design/chats<br>

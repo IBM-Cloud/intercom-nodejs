@@ -49,7 +49,9 @@ var watson = require('watson-developer-cloud'),
 
 // Splash screen
 app.get("/", function (request, response) {
-    response.render('index');
+    response.render('index', {
+      title : "Intercom"
+    });
 });
 
 // Main page for chatting with a rep
@@ -102,10 +104,7 @@ app.post('/push', function(req, res) {
   console.log("bttn " + req.body.bttnId + " push received");
 
   // Emit a bttn_push event to all active sockets
-  // Only chats associated with pushed bttn will catch event
-  var sockCall = "bttn_push_" + req.body.bttnId;
-  for (var value in sockets)
-    sockets[value].emit(sockCall, {});
+  emitSocketEvents (("bttn_push_" + req.body.bttnId));
 
   // Send result back
   res.json({"success":"true"});
@@ -139,20 +138,6 @@ app.get('/db/get_doc', function(request, response) {
   dbHelper.getDoc(db, request.body.docName, request.body.params, function(result) {
     response.send(result);
   });
-  //RETURNING DB INFO
-  /*
-  { update_seq: '96-g1AAAAG9eJzLYWBg4MhgTmGQS0lKzi9KdUhJMtLLTMo1MLDUS87JL01JzCvRy0styQGqY0pkSJL___9_ViI_SIc8XIehAU4tSQpAMskerAvNHgvcmhxAmuLBmvhQNZni1pQA0lQP1sRGrI_yWIAkQwOQAuqbn5XISbTHIDoXQHTux3Anbs9BNB6AaLyflShErAchGh9ANAI9yZMFAKFrjng',
-  db_name: 'intercom',
-  sizes: { file: 1754684, external: 3634, active: 33200 },
-  purge_seq: 0,
-  other: { data_size: 3634 },
-  doc_del_count: 32,
-  doc_count: 16,
-  disk_size: 1754684,
-  disk_format_version: 6,
-  compact_running: false,
-  instance_start_time: '0' }
-  */
 });
 
 // Saving a chat record
@@ -228,6 +213,52 @@ app.get('/db/save_rep', function(request, response) {
   });
 });
 
+// Resets the DB to a blank state by performing the following:
+// Deleting all message records
+// Deleting all chat records
+// Chaning all rep records to status='Available'
+app.get('/db/reset', function(request, response) {
+  // Validate request against VCAP_SERVICES credentials
+  var cloudantMasterCreds = getServiceCreds(appEnv, "CloudantCleanser");
+  if (cloudantMasterCreds.username === request.query.username &&
+      cloudantMasterCreds.password === request.query.password) {
+    try {
+      // Retrieve chat records and delete them
+      dbHelper.getRecords(db, 'chats', 'chats_index', function(result) {
+        var chats = JSON.parse(result);
+        for (var i=0; i < chats.length; i++) {
+          dbHelper.deleteRecord(db, chats[i].uniqueId, chats[i].revNum, function(result) {});
+        }
+        // Retrieve message records and delete them
+        dbHelper.getRecords(db, 'messages', 'messages_index', function(result) {
+          var messages = JSON.parse(result);
+          for (var i=0; i < messages.length; i++) {
+            dbHelper.deleteRecord(db, messages[i].uniqueId, messages[i].revNum, function(result) {});
+          }
+          // Retrieve rep records and mark them all as Available
+          dbHelper.getRecords(db, 'reps', 'reps_index', function(result) {
+            var reps = JSON.parse(result);
+            for (var i=0; i < reps.length; i++) {
+              if (reps[i].state !== "Available")
+                saveRepRecord(reps[i].name, reps[i].phoneNumber, "Available", reps[i].uniqueId, reps[i].revNum);
+            }
+            response.send({'success':true});
+          });
+        });
+      });
+    }
+    catch (err) {
+      console.error("Error cleansing the Cloudant DB", err);
+      response.send({'success':false,'error':'Error cleansing Cloudant DB'});
+    }
+  }
+  else {
+    console.info("Unauthorized attempt to cleanse DB was made");
+    console.info("Attempted creds: " + request.query.username + " ~ " + request.query.password);
+    response.send({'success':false,'error':'Invalid credentials'});
+  }
+});
+
 //---Twilio HTTP Requests-----------------------------------------------------------
 
 // Getting list of all bttns
@@ -244,74 +275,32 @@ app.get('/sms', function(request, response) {
           // Rep is completing the conversation
           if (request.query.Body === "COMPLETE") {
             // Update rep record in DB
-              var repRecord = {
-                'type' : "rep",
-                'repName' : rep.name,
-                'repPhoneNum' : rep.phoneNumber,
-                'state' : "Available",
-                '_id' : rep.uniqueId,
-                '_rev' : rep.revNum
-              };
-              dbHelper.insertRecord(db, repRecord, function(result) {});
+            saveRepRecord(rep.name, rep.phoneNumber, "Available", rep.uniqueId, rep.revNum);
 
             // Update chat record in DB
-              var chatRecord = {
-              'type' : "chat",
-              'startTime' : chat.startTime,
-              'chatStatus' : "Completed",
-              'bttnId' : chat.bttn,
-              'repId' : chat.rep,
-              '_id' : chat.uniqueId,
-              '_rev' : chat.revNum
-            };
-            dbHelper.insertRecord(db, chatRecord, function(result) {});
+            saveChatRecord("Completed", chat.bttn, chat.rep, chat.uniqueId, chat.revNum, chat.startTime, (new Date()).toString());
 
             // Emit a notify socket event
-            var notifySockCall = "notify_" + chat.bttn;
-            for (var value in sockets) {
-              sockets[value].emit(notifySockCall, {
-                message : rep.name + " has ended the conversation. Have a good day!"
-              });
-            }
+            emitSocketEvents (("notify_" + chat.bttn), {
+              message : rep.name + " has ended the conversation. Have a good day!"
+            });
 
             // Emit an end socket event
-            var endSockCall = "end_" + chat.bttn;
-            for (var value in sockets) {
-              sockets[value].emit(endSockCall);
-            }
+            emitSocketEvents (("end_" + chat.bttn));
           }
           // Else, they are answering the customer
           else {
             // Insert message record into DB
-            var msgRecord = {
-              'type' : "message",
-              'chatId' : chat.uniqueId,
-              'msgText' : request.query.Body,
-              'msgTime' : (new Date()).toString(),
-              'subType' : "A"
-            };
-            dbHelper.insertRecord(db, msgRecord, function(result) {});
+            saveMessageRecord(request.query.Body, (new Date()).toString(), chat.uniqueId, "A");
 
             // Update chat record in DB
-              var chatRecord = {
-              'type' : "chat",
-              'startTime' : chat.startTime,
-              'chatStatus' : "Answered",
-              'bttnId' : chat.bttn,
-              'repId' : chat.rep,
-              '_id' : chat.uniqueId,
-              '_rev' : chat.revNum
-            };
-            dbHelper.insertRecord(db, chatRecord, function(result) {});
+            saveChatRecord("Answered", chat.bttn, chat.rep, chat.uniqueId, chat.revNum, chat.startTime);
 
             // Emit an answer socket event
-            var sockCall = "answer_" + chat.bttn;
-            for (var value in sockets) {
-              sockets[value].emit(sockCall, {
-                message : request.query.Body,
-                rep : rep.name
-              });
-            }
+            emitSocketEvents (("answer_" + chat.bttn), {
+              message : request.query.Body,
+              rep : rep.name
+            });
           }
         }
         // Else, rep was not associated with any chats
@@ -409,16 +398,7 @@ io.on('connection', function(socket) {
                 twilioHelper.sendTextMessage(twilioClient, "15123086551", rep.phoneNumber, data.message);
 
               // Update chat record in DB
-              var chatRecord = {
-                'type' : "chat",
-                'startTime' : chat.startTime,
-                'chatStatus' : "Asked",
-                'bttnId' : chat.bttn,
-                'repId' : chat.rep,
-                '_id' : chat.uniqueId,
-                '_rev' : chat.revNum
-              };
-              dbHelper.insertRecord(db, chatRecord, function(result) {});
+              saveChatRecord("Asked", chat.bttn, chat.rep, chat.uniqueId, chat.revNum, chat.startTime);
             }
           });
         }
@@ -430,37 +410,16 @@ io.on('connection', function(socket) {
               textRepNewChat(rep.phoneNumber, data.message);
 
               // Update chat record in DB
-              var chatRecord = {
-                'type' : "chat",
-                'startTime' : chat.startTime,
-                'chatStatus' : "Asked",
-                'bttnId' : chat.bttn,
-                'repId' : rep.uniqueId,
-                '_id' : chat.uniqueId,
-                '_rev' : chat.revNum
-              };
-              dbHelper.insertRecord(db, chatRecord, function(result) {});
+              saveChatRecord("Asked", chat.bttn, rep.uniqueId, chat.uniqueId, chat.revNum, chat.startTime);
 
               // Update rep record in DB
-              var repRecord = {
-                'type' : "rep",
-                'repName' : rep.name,
-                'repPhoneNum' : rep.phoneNumber,
-                'state' : "Busy",
-                '_id' : rep.uniqueId,
-                '_rev' : rep.revNum
-              };
-
-              dbHelper.insertRecord(db, repRecord, function(result) {});
+              saveRepRecord(rep.name, rep.phoneNumber, "Busy", rep.uniqueId, rep.revNum);
 
               // Emit a notify socket event
-              var sockCall = "notify_" + chat.bttn;
-              for (var value in sockets) {
-                sockets[value].emit(sockCall, {
-                  message : rep.name + " has been assigned to your case and will be with you shortly",
-                  repPhoneNum : rep.phoneNumber
-                });
-              }
+              emitSocketEvents (("notify_" + chat.bttn), {
+                message : rep.name + " has been assigned to your case and will be with you shortly",
+                repPhoneNum : rep.phoneNumber
+              });
             }
             else {
               console.info("No available reps");
@@ -520,19 +479,26 @@ io.on('connection', function(socket) {
   });
 });
 
+// Emit input eventType socket event
+function emitSocketEvents (eventType, data) {
+  for (var value in sockets) {
+    sockets[value].emit(eventType, data);
+  }
+}
+
 //---Start HTTP Server----------------------------------------------------------
 server.listen(appEnv.port, function() {
+  //stabalizeDataStore();
   console.log("server started on port " + appEnv.port);
 });
 
 //---Process Ending Handlers----------------------------------------------------
 process.on("exit", function(code) {
-  // TODO: Set all chats to 'Terminated' and reps to 'Available'
+  stabalizeDataStore();
   console.log("exiting with code: " + code);
 })
 
 process.on("uncaughtException", function(err) {
-  // TODO: Set all chats to 'Terminated' and reps to 'Available'
   console.log("exiting on uncaught exception: " + err.stack);
   process.exit(1);
 })
@@ -549,6 +515,7 @@ function getServiceCreds(appEnv, serviceName) {
   return serviceCreds;
 }
 
+// Text rep with the input phone number, informing them of a new chat
 function textRepNewChat(phoneNum, question) {
 
   var message = 'You have been assigned to help a customer with the following question: "' +
@@ -558,4 +525,87 @@ function textRepNewChat(phoneNum, question) {
   // Send message to rep if not locally testing
   if (!appEnv.isLocal)
     twilioHelper.sendTextMessage(twilioClient, "15123086551", phoneNum, message);
+}
+
+// Stabalize the DB by placing all DB state values to a closed value
+function stabalizeDataStore() {
+  // Retrieve all open chats and mark them as Terminated
+  console.log("Terminating all open chats and notifying associated users")
+  dbHelper.getRecords(db, 'chats', 'chats_index', function(result) {
+    var chats = JSON.parse(result),
+        userMessage = "The server has shut down unexpectedly and your chat session has been closed as a result. We apologize for the inconvenience!",
+        repMessage = "Due to an unexpected server outage, we have ended your chat.";
+    for (var i=0; i < chats.length; i++) {
+      if (chat.chatStatus !== "Completed" && chat.chatStatus !== "Terminated") {
+        // Update chat record in DB
+        saveChatRecord("Terminated", chat.bttn, chat.rep, chat.uniqueId, chat.revNum, chat.startTime, (new Date()).toString());
+
+        // Emit a notify socket event to client saying session closed
+        var notifySockCall = "notify_" + chat.bttn;
+        for (var value in sockets) {
+          sockets[value].emit(notifySockCall, {
+            message : userMessage
+          });
+        }
+
+        // If a rep has been assigned, update their status and send them a text
+        if (chat.rep) {
+          dbHelper.getDoc(db, 'reps', 'reps_index', 'uniqueId', chat.rep, function(rep) {
+            if (rep.phoneNumber) {
+              // Notify rep of server shut down
+              if (!appEnv.isLocal)
+                twilioHelper.sendTextMessage(twilioClient, "15123086551", rep.phoneNumber, repMessage);
+
+              // Update rep record in DB
+              saveRepRecord(rep.name, rep.phoneNumber, "Available", rep.uniqueId, rep.revNum);
+            }
+            else {
+              console.log("Rep associated with chat " + chat.uniqueId + " was not found")
+            }
+          });
+        }
+      }
+    }
+  });
+}
+
+// Save rep record with the input values
+function saveRepRecord(name, phoneNum, state, uniqueId, revNum) {
+  var repRecord = {
+    'type' : "rep",
+    'repName' : name,
+    'repPhoneNum' : phoneNum,
+    'state' : state,
+    '_id' : uniqueId,
+    '_rev' : revNum
+  };
+
+  dbHelper.insertRecord(db, repRecord, function(result) {});
+}
+
+// Save chat record with the input values
+function saveChatRecord(status, bttn, rep, uniqueId, revNum, start, end) {
+  var chatRecord = {
+    'type' : "chat",
+    'startTime' : start,
+    'chatStatus' : status,
+    'bttnId' : bttn,
+    'repId' : rep,
+    '_id' : uniqueId,
+    '_rev' : revNum
+  };
+  if (end) chatRecord.endTime = end;
+  dbHelper.insertRecord(db, chatRecord, function(result) {});
+}
+
+// Save message record with the input values
+function saveMessageRecord(text, time, chat, subType) {
+  var msgRecord = {
+    'type' : "message",
+    'chatId' : chat,
+    'msgText' : text,
+    'msgTime' : time,
+    'subType' : subType
+  };
+  dbHelper.insertRecord(db, msgRecord, function(result) {});
 }

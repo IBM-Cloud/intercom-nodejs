@@ -1,4 +1,4 @@
-html, body {
+html, body, p {
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
   min-height: 100%;
   height: 100%;
@@ -7,10 +7,86 @@ html, body {
   margin: 0;
 }
 
-#welcomeText {
+.jumbotron {
+  padding-top: 20px;
+  padding-bottom: 30px;
+  background-color: #1d3649;
+  color: white;
+  width: 100%;
+}
+
+.header-text {
+  padding-left: 10px;
+  text-align: left;
+  cursor: default;
   text-align: center;
 }
 
+#welcomeText {
+  margin: 0px;
+  font-size: 3em;
+}
+
 #titleText {
+  margin: 0px;
+  font-size: 5em;
+}
+
+.center-wrapper {
   text-align: center;
+}
+
+.bluemix {
+  width: 100%;
+  margin-bottom: 30px;
+  cursor: pointer;
+}
+
+.bttn {
+  width: 150px;
+  display:inline-block;
+}
+
+.watson {
+  width: 160px;
+  display:inline-block;
+}
+
+.twilio {
+  width: 120px;
+  display:inline-block;
+}
+
+.diagram {
+  width: 100%;
+  padding: 40px 0px;
+}
+
+.plus {
+  font-weight: bold;
+  font-size: 3em;
+  color: red;
+  display: inline;
+  margin: 0px 40px;
+}
+
+.footer {
+  position: relative;
+  background-color: #41d6c3;
+  bottom: 0;
+  font-size: 15px;
+  height: 20px;
+  padding-top: 40px;
+  padding-bottom: 30px;
+  color: #000;
+  text-align: center;
+  clear: both;
+}
+
+a {
+  color: #000;
+}
+
+a:hover {
+  color: #000;
 }

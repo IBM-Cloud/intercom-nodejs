@@ -2,47 +2,51 @@
 <html lang="en">
 
   <head>
+    
     <title>{title}</title>
+
     <meta charset="utf-8">
     <meta name="description" content="Making customer service as simple as pushing a bttn.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="images/favicon.ico">
-    <link href="css/bootstrap.min.css" type="text/css" rel="stylesheet">
-    <link href="css/splash.css" type="text/css" rel="stylesheet">
 
-    <!-- Run all vendor JS scripts -->
-    <script src="javascript/jquery-1.11.2.min.js"></script>
-    <script src="javascript/bootstrap.min.js"></script>
+    <!-- CSS -->
+    <link href="//bootswatch.com/flatly/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="css/ben.css" type="text/css" rel="stylesheet">
+
   </head>
 
   <body>
     <div class="container-fluid">
+
+      <!-- Header -->
       <div class="jumbotron">
         <div class="header-text">
-          <p id="welcomeText">Welcome to</p>
-          <p id="titleText">Intercom</p>
+        <img src="../images/IBM_Bluemix_logo.png" id="bluemix-logo"></img>
+         <h1 class="text-center">Intercom</h1>
         </div>
       </div>
-      <div class="row center-wrapper">
-        <div class="col-lg-offset-4 col-md-offset-4 col-sm-offset-4 col-xs-offset-3 col-lg-4 col-md-4 col-sm-4 col-xs-6">
-          <img src="../images/IBM_Bluemix_logo.png" class="bluemix"></img>
+  
+      <!-- Page Content -->
+      <div class="row col-sm-12 col-md-offset-2 col-md-8 col-lg-offset-2 col-lg-8">
+        <div class="center-wrapper">
+          <img src="../images/diagram-without-title.png" class="diagram"></img>
         </div>
-      </div>
-      <div class="row center-wrapper">
-        <img src="../images/bttn.png" class="bttn"></img>
-        <p class="plus">+</p>
-        <img src="../images/watson.gif" class="watson"></img>
-        <p class="plus">+</p>
-        <img src="../images/twilio.png" class="twilio"></img>
-      </div>
-      <div class="explain"></div>
-      <div class="center-wrapper">
-        <img src="../images/diagram.png" class="diagram"></img>
+        <p style="margin: 50px auto">Intercom allows users to remotely chat with representatives using <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/speech-to-text.html" target="_blank">Watson Speech to Text</a> technology. The representatives are notified via SMS text message and can reply directly to the user using a SMS text message API from <a href="https://www.twilio.com/" target="_blank">Twilio</a>. All of this is kicked off at the push of a button, enabling users to communicate with ease by avoiding manual input to the application. Try it out now!</p>
+        <a id="get-started-btn" class="btn btn-success btn-lg bluemix">Start Talking Now ></a>
       </div>
     </div>
+
+
+    <!-- Footer -->
     <div class="footer">
-      <p class="muted credit">Made by <a href="http://twitter.com/jakepeyser">@jakepeyser</a>. Powered by <a href="http://bluemix.net" target="_blank">IBM Bluemix</a>.</p>
+      <p class="muted credit" style="margin: 0px;">Made by <a href="http://twitter.com/jakepeyser">@jakepeyser</a> - Powered by <a href="http://bluemix.net" target="_blank">IBM Bluemix</a></p>
     </div>
+
+    <!-- Scripts -->
+    <script src="javascript/jquery-1.11.2.min.js"></script>
+    <script src="javascript/bootstrap.min.js"></script>
     <script type='text/javascript', src="javascript/splash.js"></script>
+  
   </body>
 </html>

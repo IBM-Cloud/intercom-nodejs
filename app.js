@@ -488,7 +488,7 @@ function emitSocketEvents (eventType, data) {
 
 //---Start HTTP Server----------------------------------------------------------
 server.listen(appEnv.port, function() {
-  stabalizeDataStore();
+  //stabalizeDataStore();
   console.log("server started on port " + appEnv.port);
 });
 

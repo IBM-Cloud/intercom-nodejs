@@ -1,4 +1,11 @@
 ---
+declared-services:
+  speech-to-text-service:
+    label: speech_to_text
+    plan: free
+  cloudant-service:
+    label: cloudantNoSQLDB
+    plan: Shared
 applications:
 - name: Intercom
   framework: node
@@ -8,3 +15,6 @@ applications:
   host: intercom
   path: .
   command: node app.js
+  services:
+  - speech-to-text-service
+  - cloudant-service

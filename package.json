@@ -36,6 +36,11 @@
     "url": ""
     },
     "scripts": {
-    "start": "node app.js"
+        "start": "node app.js",
+        "install": "node admin.js track",
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/IBM-Bluemix/intercom-nodejs.git"
     }
 }

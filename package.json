@@ -37,7 +37,7 @@
     },
     "scripts": {
         "start": "node app.js",
-        "install": "node admin.js track",
+        "install": "node admin.js track"
     },
     "repository": {
         "type": "git",

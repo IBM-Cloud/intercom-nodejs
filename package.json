@@ -1,7 +1,20 @@
 {
-    "name": "Intercom",
+    "name": "intercom-sample-app",
     "version": "0.0.1",
-    "private": true,
+    "private": false,
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "install": "node admin.js track",
+        "postinstall": "bower install --allow-root"
+    },
+    "engines": {
+        "node": "0.10.*"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/IBM-Bluemix/intercom-nodejs.git"
+    },
     "dependencies": {
         "express": "4.0.*",
         "body-parser": "1.0.*",
@@ -13,29 +26,12 @@
         "twilio": "2.0.*",
         "watson-developer-cloud": "0.9.*",
         "socket.io": "1.3.*",
-        "commander": "^2.6.0",
-        "http-post": "^0.1.1"
+        "commander": "2.8.*",
+        "http-post": "0.1.*"
     },
-    "engines": {
-        "node": "0.10.*"
-    },
-    "author": "IBM Corp.",
-    "contributors": [
-    {
-      "name": "Jake Peyser",
-      "email": "jepeyser@us.ibm.com"
-    }
-    ],
-    "license": "2015 IBM Corporation",
-    "bugs": {
-    "url": ""
-    },
-    "scripts": {
-        "start": "node app.js",
-        "install": "node admin.js track"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/IBM-Bluemix/intercom-nodejs.git"
-    }
+    "author": [{
+        "name": "Jake Peyser",
+        "email": "jepeyser@us.ibm.com"
+    }],
+    "license": "2015 IBM Corporation"
 }

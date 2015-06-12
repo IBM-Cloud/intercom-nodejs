@@ -2,7 +2,7 @@
 <html lang="en">
 
   <head>
-    
+
     <title>{title}</title>
 
     <meta charset="utf-8">
@@ -11,7 +11,7 @@
     <link rel="shortcut icon" href="images/favicon.ico">
 
     <!-- CSS -->
-    <link href="//bootswatch.com/flatly/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="vendor/bootstrap/dist/css/bootstrap.min.css" type="text/css" rel="stylesheet">
     <link href="css/ben.css" type="text/css" rel="stylesheet">
 
   </head>
@@ -26,7 +26,7 @@
          <h1 class="text-center">Intercom</h1>
         </div>
       </div>
-  
+
       <!-- Page Content -->
       <div class="row col-sm-12 col-md-offset-2 col-md-8 col-lg-offset-2 col-lg-8">
         <div class="center-wrapper">
@@ -40,13 +40,13 @@
 
     <!-- Footer -->
     <div class="footer">
-      <p class="muted credit" style="margin: 0px;">Made by <a href="http://twitter.com/jakepeyser">@jakepeyser</a> - Powered by <a href="http://bluemix.net" target="_blank">IBM Bluemix</a></p>
+      <p class="muted credit" style="margin: 0px;">Made by <a href="http://twitter.com/jakepeyser">@jakepeyser</a> - Powered by <a href="https://console.ng.bluemix.net/?cm_mmc=SampleAppLink-_-BluemixSampleApp-_-Node-_-WatsonSpeechToText" target="_blank">IBM Bluemix</a></p>
     </div>
 
     <!-- Scripts -->
-    <script src="javascript/jquery-1.11.2.min.js"></script>
-    <script src="javascript/bootstrap.min.js"></script>
+    <script src="vendor/jquery/dist/jquery.min.js"></script>
+    <script src="vendor/bootstrap/dist/js/bootstrap.min.js"></script>
     <script type='text/javascript', src="javascript/splash.js"></script>
-  
+
   </body>
 </html>

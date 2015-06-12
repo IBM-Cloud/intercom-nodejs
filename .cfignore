@@ -1,5 +1,23 @@
-License.txt
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Compiled binary addons (http://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directory
 node_modules
-README.md
-vcap-local.json
+
+.DS_STORE
 npm-debug.log
+vcap-local.json
+
+public/vendor/
+
+# GitHub Files
+README.md

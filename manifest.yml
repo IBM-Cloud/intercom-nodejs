@@ -1,20 +1,20 @@
 ---
 declared-services:
-  speech-to-text-service:
+  intercom-speech-to-text:
     label: speech_to_text
     plan: free
-  cloudant-service:
+  intercom-cloudant:
     label: cloudantNoSQLDB
     plan: Shared
 applications:
-- name: Intercom
+- name: intercom-sample-app
   framework: node
   runtime: node10
   memory: 512M
   instances: 1
-  host: intercom
+  host: intercom-sample-app
   path: .
   command: node app.js
   services:
-  - speech-to-text-service
-  - cloudant-service
+  - intercom-speech-to-text
+  - intercom-cloudant

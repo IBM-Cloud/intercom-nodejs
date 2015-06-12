@@ -1,0 +1,15 @@
+{
+  "name": "intercom-sample-app",
+  "version": "0.0.1",
+  "private": false,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "public/vendor"
+  ],
+  "dependencies": {
+    "bootstrap": "*",
+    "jquery": "*",
+    "socket.io-client": "*"
+  }
+}

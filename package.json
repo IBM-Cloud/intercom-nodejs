@@ -17,6 +17,7 @@
     },
     "dependencies": {
         "express": "4.0.*",
+        "bower": "*",
         "body-parser": "1.0.*",
         "method-override": "1.0.*",
         "dustjs-linkedin": "2.6.*",

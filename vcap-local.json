@@ -22,7 +22,7 @@
       ],
       "speech_to_text": [
          {
-            "name": "SpeechToText",
+            "name": "intercom-speech-to-text",
             "label": "speech_to_text",
             "plan": "free",
             "credentials": {
@@ -34,7 +34,7 @@
       ],
       "cloudantNoSQLDB": [
          {
-            "name": "Cloudant",
+            "name": "intercom-cloudant",
             "label": "cloudantNoSQLDB",
             "plan": "Shared",
             "credentials": {

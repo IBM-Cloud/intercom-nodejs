@@ -14,7 +14,7 @@
     <script type='text/javascript', src="vendor/jquery/dist/jquery.min.js"></script>
     <script type='text/javascript', src="vendor/bootstrap/dist/js/bootstrap.min.js"></script>
     <script type='text/javascript', src="javascript/speech-recognizer.js"></script>
-    <script type='text/javascript', src="vendor/socket.io-client/socket.io.js"></script>
+    <script type='text/javascript', src="javascript/socket.io.js"></script>
     <script type='text/javascript', src="javascript/constantSocket.js"></script>
   </head>
 

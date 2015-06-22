@@ -311,7 +311,7 @@ SpeechRecognizer.prototype._init = function() {
     self.onend();
   });
 
-  this.socket.on('speech_session', function(session) {
+  this.socket.on('session', function(session) {
     console.log('Speech session:', session);
     self.sessions.push(session);
     self.session_id = session;
@@ -339,7 +339,7 @@ SpeechRecognizer.prototype._init = function() {
 };
 
 /**
- * The stop method represents an instruction to the
+ * The start method represents an instruction to the
  * recognition service to start listening
  */
 SpeechRecognizer.prototype.start = function() {

@@ -8,6 +8,9 @@ var express = require('express'),
     consolidate = require("consolidate"),
     cfenv = require("cfenv");
 
+//---Deployment Tracker---------------------------------------------------------
+require("cf-deployment-tracker-client").track();
+
 //---Routers and View Engine----------------------------------------------------
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
@@ -29,18 +32,46 @@ var appEnvOpts = vcapLocal ? {vcap:vcapLocal} : {}
 var appEnv = cfenv.getAppEnv(appEnvOpts);
 
 //---Set up Cloudant------------------------------------------------------------
-var cloudantCreds = getServiceCreds(appEnv, "Cloudant"),
+var cloudantCreds = getServiceCreds(appEnv, "intercom-cloudant"),
     nano = require("nano")(cloudantCreds.url),
-    db = nano.db.use("intercom"),
-    dbHelper = require("./lib/cloudantHelper.js");
+    dbHelper = require("./lib/cloudantHelper.js"),
+    dbName = "intercom",
+    db;
+
+//Construct 'intercom' DB if it does not exist
+dbHelper.dbExists(nano, dbName, function (err,res) {
+  if (!err) {
+    if (res) {
+      db = nano.db.use(dbName);
+      console.log("'" + dbName + "' found - using DB");
+    }
+    else {
+      console.log("'" + dbName + "' not found - creating DB");
+      nano.db.create(dbName, function(err, body) {
+        if (err) {
+          console.error('Error creating ' + dbName);
+        }
+        else {
+          console.log("'" + dbName + "' DB created");
+          db = nano.db.use(dbName);
+          seedDB();
+        }
+      });
+    }
+  }
+  else {
+    console.error("Could not verify if DB exists. Issues may result");
+  }
+});
 
 //---Set up Twilio--------------------------------------------------------------
 var twilioCreds = getServiceCreds(appEnv, "Twilio"),
     twilioClient = require('twilio')(twilioCreds.accountSID, twilioCreds.authToken),
-    twilioHelper = require("./lib/twilioHelper.js");
+    twilioHelper = require("./lib/twilioHelper.js"),
+    twiloNumber = "15555555555";
 
 //---Set up Watson Speech-To-Text-----------------------------------------------
-var speechToTextCreds = getServiceCreds(appEnv, "SpeechToText");
+var speechToTextCreds = getServiceCreds(appEnv, "intercom-speech-to-text");
 speechToTextCreds.version = "v1";
 var watson = require('watson-developer-cloud'),
     speechToText = watson.speech_to_text(speechToTextCreds);
@@ -214,9 +245,9 @@ app.get('/db/save_rep', function(request, response) {
 });
 
 // Resets the DB to a blank state by performing the following:
-// Deleting all message records
-// Deleting all chat records
-// Chaning all rep records to status='Available'
+// Deletes all message records
+// Deletes all chat records
+// Changing all reps' status='Available'
 app.get('/db/reset', function(request, response) {
   // Validate request against VCAP_SERVICES credentials
   var cloudantMasterCreds = getServiceCreds(appEnv, "CloudantCleanser");
@@ -264,7 +295,6 @@ app.get('/db/reset', function(request, response) {
 // Getting list of all bttns
 app.get('/sms', function(request, response) {
   console.log("Received a text message: " + request.query.Body + " from " + request.query.From);
-  console.log(request);
   // Find rep with sender number in docs
   dbHelper.getDoc(db, 'reps', 'reps_index', 'phoneNumber', request.query.From.substr(1), function(rep) {
     // If rep was found, update rep record as busy
@@ -370,7 +400,7 @@ io.use(function(socket, next) {
       sockets[socket.id] = socket;
       console.log(socketLog(socket.id), 'created session');
       console.log('The system now has:', Object.keys(sessions).length, 'sessions.');
-      socket.emit('speech_session', session.session_id);
+      socket.emit('session', session.session_id);
       next();
     }
   });
@@ -395,7 +425,7 @@ io.on('connection', function(socket) {
             if (rep.phoneNumber) {
               // Send message to rep if not locally testing
               if (!appEnv.isLocal)
-                twilioHelper.sendTextMessage(twilioClient, "15123086551", rep.phoneNumber, data.message);
+                twilioHelper.sendTextMessage(twilioClient, twiloNumber, rep.phoneNumber, data.message);
 
               // Update chat record in DB
               saveChatRecord("Asked", chat.bttn, chat.rep, chat.uniqueId, chat.revNum, chat.startTime);
@@ -524,46 +554,61 @@ function textRepNewChat(phoneNum, question) {
 
   // Send message to rep if not locally testing
   if (!appEnv.isLocal)
-    twilioHelper.sendTextMessage(twilioClient, "15123086551", phoneNum, message);
+    twilioHelper.sendTextMessage(twilioClient, twiloNumber, phoneNum, message);
 }
 
 // Stabalize the DB by placing all DB state values to a closed value
 function stabalizeDataStore() {
-  // Retrieve all open chats and mark them as Terminated
-  console.log("Terminating all open chats and notifying associated users")
-  dbHelper.getRecords(db, 'chats', 'chats_index', function(result) {
-    var chats = JSON.parse(result),
-        userMessage = "The server has shut down unexpectedly and your chat session has been closed as a result. We apologize for the inconvenience!",
-        repMessage = "Due to an unexpected server outage, we have ended your chat.";
-    for (var i=0; i < chats.length; i++) {
-      if (chat.chatStatus !== "Completed" && chat.chatStatus !== "Terminated") {
-        // Update chat record in DB
-        saveChatRecord("Terminated", chat.bttn, chat.rep, chat.uniqueId, chat.revNum, chat.startTime, (new Date()).toString());
+  dbHelper.dbExists(nano, dbName, function (err,res) {
+    if (err) {
+      console.error("Cannot stabalize data store - error getting DB list");
+    }
+    else if (!res) {
+      console.log("DB does not exist - skip datastore stabalization");
+    }
+    else {
+      // Retrieve all open chats and mark them as Terminated
+      setTimeout(function(){}, 3000);
+      if (db) {
+        console.log("Terminating all open chats and notifying associated users")
+        dbHelper.getRecords(db, 'chats', 'chats_index', function(result) {
+          var chats = JSON.parse(result),
+              userMessage = "The server has shut down unexpectedly and your chat session has been closed as a result. We apologize for the inconvenience!",
+              repMessage = "Due to an unexpected server outage, we have ended your chat.",
+              chat;
+          for (var i=0; i < chats.length; i++) {
+            chat = chats[i];
+            if (chat.chatStatus !== "Completed" && chat.chatStatus !== "Terminated") {
+              // Update chat record in DB
+              saveChatRecord("Terminated", chat.bttn, chat.rep, chat.uniqueId, chat.revNum, chat.startTime, (new Date()).toString());
 
-        // Emit a notify socket event to client saying session closed
-        var notifySockCall = "notify_" + chat.bttn;
-        for (var value in sockets) {
-          sockets[value].emit(notifySockCall, {
-            message : userMessage
-          });
-        }
+              // Emit a notify socket event to client saying session closed
+              var notifySockCall = "notify_" + chat.bttn;
+              for (var value in sockets) {
+                sockets[value].emit(notifySockCall, {
+                  message : userMessage
+                });
+              }
 
-        // If a rep has been assigned, update their status and send them a text
-        if (chat.rep) {
-          dbHelper.getDoc(db, 'reps', 'reps_index', 'uniqueId', chat.rep, function(rep) {
-            if (rep.phoneNumber) {
-              // Notify rep of server shut down
-              if (!appEnv.isLocal)
-                twilioHelper.sendTextMessage(twilioClient, "15123086551", rep.phoneNumber, repMessage);
+              // If a rep has been assigned, update their status and send them a text
+              if (chat.rep) {
+                dbHelper.getDoc(db, 'reps', 'reps_index', 'uniqueId', chat.rep, function(rep) {
+                  if (rep.phoneNumber) {
+                    // Notify rep of server shut down
+                    if (!appEnv.isLocal)
+                      twilioHelper.sendTextMessage(twilioClient, twiloNumber, rep.phoneNumber, repMessage);
 
-              // Update rep record in DB
-              saveRepRecord(rep.name, rep.phoneNumber, "Available", rep.uniqueId, rep.revNum);
+                    // Update rep record in DB
+                    saveRepRecord(rep.name, rep.phoneNumber, "Available", rep.uniqueId, rep.revNum);
+                  }
+                  else {
+                    console.log("Rep associated with chat " + chat.uniqueId + " was not found")
+                  }
+                });
+              }
             }
-            else {
-              console.log("Rep associated with chat " + chat.uniqueId + " was not found")
-            }
-          });
-        }
+          }
+        });
       }
     }
   });
@@ -608,4 +653,102 @@ function saveMessageRecord(text, time, chat, subType) {
     'subType' : subType
   };
   dbHelper.insertRecord(db, msgRecord, function(result) {});
+}
+
+// Set up the DB to default status
+function seedDB() {
+
+  // Create design docs and insert them
+  var designDocs = [
+    {
+      "_id": "_design/reps",
+      views: {
+        reps_index: {
+          map: function(doc) {
+            if (doc.type === 'rep') {
+              emit (doc._id, {
+                uniqueId : doc._id,
+                revNum : doc._rev,
+                name : doc.repName,
+                phoneNumber : doc.repPhoneNum,
+                state : doc.state
+              });
+            }
+          }
+        }
+      }
+    },
+    {
+      "_id": "_design/bttns",
+      views: {
+        bttns_index: {
+          map: function(doc) {
+            if (doc.type === 'bttn') {
+              emit (doc._id, {
+                uniqueId : doc._id,
+                revNum : doc._rev,
+                name : doc.bttnName,
+                bttnId : doc.bttnId
+              });
+            }
+          }
+        }
+      }
+    },
+    {
+      "_id": "_design/chats",
+      views: {
+        chats_index: {
+          map: function(doc) {
+            if (doc.type === 'chat') {
+              emit (doc._id, {
+                uniqueId : doc._id,
+                revNum : doc._rev,
+                startTime : doc.startTime,
+                chatStatus : doc.chatStatus,
+                bttn : doc.bttnId,
+                rep : doc.repId
+              });
+            }
+          }
+        }
+      }
+    },
+    {
+      "_id": "_design/messages",
+      views: {
+        messages_index: {
+          map: function(doc) {
+            if (doc.type === 'message') {
+              emit (doc._id, {
+                uniqueId : doc._id,
+                revNum : doc._rev,
+                chatId : doc.chatId,
+                message : doc.messageText,
+                date : doc.dateTime,
+                subType : doc.subType
+              });
+            }
+          }
+        }
+      }
+    },
+  ];
+
+  designDocs.forEach(function(doc) {
+    db.insert(doc, doc._id, function(err, body) {
+      if (!err)
+        console.log(body);
+    });
+  });
+
+  // Create rep doc and insert it
+  var initialRep = {
+    "type" : "rep",
+    "repName" : "John Doe",
+    "repPhoneNum" : "15555555555",
+    "state" : "Available"
+  }
+
+  dbHelper.insertRecord(db, initialRep, function (res) {});
 }

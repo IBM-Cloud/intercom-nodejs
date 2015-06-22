@@ -27,7 +27,7 @@ function ConstantSocket(_options) {
     self.onEnd();
   });
 
-  this.socket.on('message_session', function(session) {
+  this.socket.on('session', function(session) {
     console.log('Message session: ', session);
     self.session_id = session;
   });

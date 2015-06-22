@@ -12,7 +12,7 @@
 
     <!-- CSS -->
     <link href="vendor/bootstrap/dist/css/bootstrap.min.css" type="text/css" rel="stylesheet">
-    <link href="css/ben.css" type="text/css" rel="stylesheet">
+    <link href="css/splash.css" type="text/css" rel="stylesheet">
 
   </head>
 
@@ -30,17 +30,17 @@
       <!-- Page Content -->
       <div class="row col-sm-12 col-md-offset-2 col-md-8 col-lg-offset-2 col-lg-8">
         <div class="center-wrapper">
-          <img src="../images/diagram-without-title.png" class="diagram"></img>
+          <img src="../images/diagram.png" class="diagram"></img>
         </div>
         <p style="margin: 50px auto">Intercom allows users to remotely chat with representatives using <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/speech-to-text.html" target="_blank">Watson Speech to Text</a> technology. The representatives are notified via SMS text message and can reply directly to the user using a SMS text message API from <a href="https://www.twilio.com/" target="_blank">Twilio</a>. All of this is kicked off at the push of a button, enabling users to communicate with ease by avoiding manual input to the application. Try it out now!</p>
-        <a id="get-started-btn" class="btn btn-success btn-lg bluemix">Start Talking Now ></a>
+        <a id="get-started-btn" class="btn btn-success btn-lg get-started">Start Talking Now ></a>
       </div>
     </div>
 
 
     <!-- Footer -->
     <div class="footer">
-      <p class="muted credit" style="margin: 0px;">Made by <a href="http://twitter.com/jakepeyser">@jakepeyser</a> - Powered by <a href="https://console.ng.bluemix.net/?cm_mmc=SampleAppLink-_-BluemixSampleApp-_-Node-_-WatsonSpeechToText" target="_blank">IBM Bluemix</a></p>
+      <p class="muted credit" style="margin: 0px;">Made by <a href="http://twitter.com/jakepeyser">@jakepeyser</a> - Powered by <a href="https://console.ng.bluemix.net/?cm_mmc=Display-SampleAppLink-_-BluemixSampleApp-Intercom-_-Node-WatsonSpeechToText-_-BM-DevAd" target="_blank">IBM Bluemix</a></p>
     </div>
 
     <!-- Scripts -->

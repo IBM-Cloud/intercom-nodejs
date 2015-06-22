@@ -9,7 +9,6 @@
   ],
   "dependencies": {
     "bootstrap": "*",
-    "jquery": "*",
-    "socket.io-client": "*"
+    "jquery": "*"
   }
 }
